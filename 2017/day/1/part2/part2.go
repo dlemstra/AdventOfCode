@@ -6,7 +6,7 @@ import (
 )
 
 func InverseCaptcha(input string) int {
-    total := 0;
+    total := 0
     length := len(input)
     offset := length / 2
 
