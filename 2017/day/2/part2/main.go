@@ -2,14 +2,51 @@ package main
 
 import (
     "fmt"
+    "strconv"
     "strings"
 )
+
+func GetEvenlyDivisibleValue(input []int) (int) {
+    for i := 0; i < len(input) - 1; i++ {
+        for j := i + 1; j < len(input); j++ {
+            min := input[i]
+            max := input[j]
+            if min > max {
+                min, max = max, min
+            }
+
+            int_value := max / min
+            float_value := float64(max) / float64(min)
+
+            if float64(int_value) == float_value {
+                return int_value
+            }
+        }
+    }
+
+    panic("should not be reached")
+}
+
+func GetNumbers(line string) ([]int) {
+    numbers := strings.Split(line,"\t")
+    result := []int {}
+
+    for _, number := range numbers {
+        number = strings.TrimSpace(number)
+        nr, _ := strconv.Atoi(number)
+        result = append(result, nr)
+    }
+
+    return result
+}
 
 func CorruptionChecksum(input string) int {
     total := 0
 
     lines := strings.Split(input,"\n")
     for _, line := range lines {
+        numbers := GetNumbers(line)
+        total += GetEvenlyDivisibleValue(numbers)
     }
     return total
 }
