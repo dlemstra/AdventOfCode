@@ -6,13 +6,14 @@ import (
 )
 
 func InverseCaptcha(input string) int {
-    total := 0;
+    total := 0
+    length := len(input)
 
-    for i := 0; i < len(input); i++ {
+    for i := 0; i < length; i++ {
         index := i + 1
 
-        if i == len(input) - 1 {
-            index = 0
+        if (index >= length) {
+            index -= length
         }
 
         if input[i] != input[index] {
