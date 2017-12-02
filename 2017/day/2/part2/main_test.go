@@ -5,7 +5,7 @@ import (
     "github.com/stretchr/testify/assert"
 )
 
-func TestInverseCaptcha(t *testing.T) {
+func TestCorruptionChecksum(t *testing.T) {
     result := CorruptionChecksum(`5	9	2	8
 9	4	7	3
 3	8	6	5`)
