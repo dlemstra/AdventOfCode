@@ -7,7 +7,7 @@ import (
 
 func TestSpiralMemory_1(t *testing.T) {
     result := SpiralMemory(1)
-    assert.Equal(t, 1, result)
+    assert.Equal(t, 2, result)
 }
 
 func TestSpiralMemory_3(t *testing.T) {
@@ -26,8 +26,8 @@ func TestSpiralMemory_58(t *testing.T) {
 }
 
 func TestSpiralMemory_200(t *testing.T) {
-    result := SpiralMemory(304)
-    assert.Equal(t, 7, result)
+    result := SpiralMemory(200)
+    assert.Equal(t, 304, result)
 }
 
 func TestSpiralMemory_305(t *testing.T) {
