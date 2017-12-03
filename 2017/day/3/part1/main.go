@@ -4,11 +4,11 @@ import (
     "fmt"
 )
 
-func SpiralMemory(input string) int {
+func SpiralMemory(input int) int {
     return 42
 }
 
 func main() {
-    result := SpiralMemory("325489")
+    result := SpiralMemory(325489)
     fmt.Println(result)
 }
