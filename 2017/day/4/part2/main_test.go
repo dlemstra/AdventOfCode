@@ -25,7 +25,7 @@ func TestIsValidPassphrase_iiii_oiii_ooii_oooi_oooo(t *testing.T) {
     assert.Equal(t, true, result)
 }
 
-func TestIsValidPassphrase_iiii_oiii_ooii_oooi_oooo(t *testing.T) {
+func TestIsValidPassphrase_oiii_ioii_iioi_iiio(t *testing.T) {
     result := IsValidPassphrase("oiii ioii iioi iiio")
     assert.Equal(t, false, result)
 }
