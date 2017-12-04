@@ -40,6 +40,6 @@ func HighEntropyPassphrases(fileName string) int {
 }
 
 func main() {
-    result := HighEntropyPassphrases("input")
+    result := HighEntropyPassphrases("../input")
     fmt.Println(result)
 }
