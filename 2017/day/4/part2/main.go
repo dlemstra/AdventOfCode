@@ -4,10 +4,34 @@ import (
     "fmt"
     "strings"
     "io/ioutil"
+    "sort"
 )
 
+func appendIfMissing(slice []string, value string) []string {
+    for _, val := range slice {
+        if value == val {
+            return slice
+        }
+    }
+    return append(slice, value)
+}
+
+func sortString(value string) string {
+    chars := strings.Split(value,"")
+    sort.Strings(chars)
+    return strings.Join(chars,"")
+}
+
 func IsValidPassphrase(passphrase string) (bool) {
-    return false
+    words := strings.Split(passphrase," ")
+    distinctWords := []string {}
+
+    for _, word := range words {
+        word = sortString(word)
+        distinctWords = appendIfMissing(distinctWords, word)
+    }
+
+    return len(words) == len(distinctWords)
 }
 
 func HighEntropyPassphrases(fileName string) int {
