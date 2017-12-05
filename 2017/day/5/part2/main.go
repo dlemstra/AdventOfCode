@@ -7,8 +7,27 @@ import (
     "strconv"
 )
 
+func changeJump(value int) int {
+    if value >= 3 {
+        return value - 1
+    } else {
+        return value + 1
+    }
+}
+
 func GetTwistyTrampolines(input []int) int {
     steps := 0
+    i := 0
+    for i < len(input) {
+        steps++
+        inc := input[i]
+        if inc == 0 {
+            input[i]++
+            continue
+        }
+        input[i] = changeJump(input[i])
+        i += inc
+    }
     return steps
 }
 
