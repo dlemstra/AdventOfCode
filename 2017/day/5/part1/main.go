@@ -13,10 +13,6 @@ func GetTwistyTrampolines(input []int) int {
     for i < len(input) {
         steps++
         inc := input[i]
-        if inc == 0 {
-            input[i]++
-            continue
-        }
         input[i]++
         i += inc
     }
