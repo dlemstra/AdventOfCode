@@ -7,6 +7,12 @@ import (
     "io/ioutil"
 )
 
+func copyArray(input []int) []int {
+    clone := make([]int, len(input))
+    copy(clone, input)
+    return clone
+}
+
 func max(input []int) (int, int) {
     index := 0
     max := 0
@@ -32,9 +38,7 @@ func checkSeen(seen [][]int, values []int) ([][]int, bool) {
         }
     }
 
-    item := make([]int, len(values))
-    copy(item, values)
-    seen = append(seen, item)
+    seen = append(seen, copyArray(values))
     return seen, false
 }
 
