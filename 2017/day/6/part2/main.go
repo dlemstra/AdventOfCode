@@ -7,6 +7,12 @@ import (
     "io/ioutil"
 )
 
+func copyArray(input []int) []int {
+    clone := make([]int, len(input))
+    copy(clone, input)
+    return clone
+}
+
 func max(input []int) (int, int) {
     index := 0
     max := 0
@@ -20,30 +26,27 @@ func max(input []int) (int, int) {
     return index, max
 }
 
-func checkSeen(seen [][]int, values []int) ([][]int, bool) {
-    for _, elem := range seen {
+func checkSeen(seen [][]int, values []int) ([][]int, int) {
+    for j, elem := range seen {
         for i:=0; i < len(values); i++ {
             if values[i] != elem[i] {
                 break
             }
             if i == len(values) - 1 {
-                return seen, true
+                return seen, len(seen) - j
             }
         }
     }
 
-    item := make([]int, len(values))
-    copy(item, values)
-    seen = append(seen, item)
-    return seen, false
+    seen = append(seen, copyArray(values))
+    return seen, 0
 }
 
 func MemoryReallocation(input []int) int {
     cycles := 0
     seen := [][]int {}
-    isSeen := false
 
-    for !isSeen {
+    for cycles == 0 {
         index, max := max(input)
         input[index] -= max
         for i:=0; i < max; i++ {
@@ -53,8 +56,7 @@ func MemoryReallocation(input []int) int {
             }
             input[index]++
         }
-        seen, isSeen = checkSeen(seen, input)
-        cycles++
+        seen, cycles = checkSeen(seen, input)
     }
 
     return cycles
