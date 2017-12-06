@@ -42,6 +42,18 @@ func checkSeen(seen [][]int, values []int) ([][]int, int) {
     return seen, 0
 }
 
+func getIndexes(offset int, count int, length int) chan int {
+    c := make(chan int, count)
+    for count > 0 {
+        c <- offset % length
+        offset++
+        count--
+    }
+    close(c)
+
+    return c
+}
+
 func MemoryReallocation(input []int) int {
     cycles := 0
     seen := [][]int {}
@@ -49,12 +61,9 @@ func MemoryReallocation(input []int) int {
     for cycles == 0 {
         index, max := max(input)
         input[index] -= max
-        for i:=0; i < max; i++ {
-            index++
-            if index == len(input) {
-                index = 0
-            }
-            input[index]++
+
+        for i := range getIndexes(index + 1, max, len(input)) {
+            input[i]++
         }
         seen, cycles = checkSeen(seen, input)
     }
