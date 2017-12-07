@@ -6,7 +6,7 @@ import (
 )
 
 func TestMemoryReallocation(t *testing.T) {
-    input := ReadInput("../input")
+    input := ReadInput("../test_input")
     result := RecursiveCircus(input)
     assert.Equal(t, "tknk", result)
 }
