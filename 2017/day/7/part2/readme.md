@@ -1,4 +1,4 @@
---- Part Two ---
+# --- Part Two ---
 
 The programs explain the situation: they can't get down. Rather, they could get down, if they weren't expending all of their energy trying to keep the tower balanced. Apparently, one program has the wrong weight, and until it's fixed, they're stuck here.
 
