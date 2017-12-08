@@ -49,14 +49,21 @@ func isConditionTrue(instruction Instruction, values map[string]int) bool {
 
 func LikeRegisters(instructions []Instruction) int {
     values := make(map[string]int)
+    maxValue := 0
 
     for _,instruction := range instructions {
         if isConditionTrue(instruction, values) {
             values[instruction.target] += instruction.increment
+            if instruction.increment > 0 {
+                currentMax := max(values)
+                if currentMax > maxValue {
+                    maxValue = currentMax
+                }
+            }
         }
     }
 
-    return max(values)
+    return maxValue
 }
 
 func ReadInput(fileName string) []Instruction {
