@@ -21,3 +21,7 @@ After this process, the largest value in any register is 1.
 You might also encounter <= (less than or equal to) or != (not equal to). However, the CPU doesn't have the bandwidth to tell you what all the registers are named, and leaves that to you to determine.
 
 What is the largest value in any register after completing the instructions in your puzzle input?
+
+# --- Part Two ---
+
+To be safe, the CPU also needs to know the highest value held in any register during this process so that it can decide how much memory to allocate to these operations. For example, in the above instructions, the highest value ever held was 10 (in register c after the third instruction was evaluated).
