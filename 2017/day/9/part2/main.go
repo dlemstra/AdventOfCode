@@ -6,8 +6,7 @@ import (
 )
 
 func StreamProcessing(input string) int {
-    score := 0
-    level := 0
+    total := 0
     insideGarbage := false
 
     for i := 0; i < len(input); i++ {
@@ -19,20 +18,15 @@ func StreamProcessing(input string) int {
                 insideGarbage = false
             default:
                 if insideGarbage == true {
+                    total++
                     continue
                 }
-                switch c {
-                    case '<':
-                        insideGarbage = true
-                    case '{':
-                        level++
-                    case '}':
-                        score += level
-                        level--
+                if c == '<' {
+                    insideGarbage = true
                 }
         }
     }
-    return score
+    return total
 }
 
 func ReadInput(fileName string) string {
