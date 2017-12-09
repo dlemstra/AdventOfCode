@@ -7,6 +7,31 @@ import (
 
 func StreamProcessing(input string) int {
     score := 0
+    level := 0
+    insideGarbage := false
+
+    for i := 0; i < len(input); i++ {
+        c := input[i]
+        switch c {
+            case '!':
+                i++
+            case '>':
+                insideGarbage = false
+            default:
+                if insideGarbage == true {
+                    continue
+                }
+                switch c {
+                    case '<':
+                        insideGarbage = true
+                    case '{':
+                        level++
+                    case '}':
+                        score += level
+                        level--
+                }
+        }
+    }
     return score
 }
 
