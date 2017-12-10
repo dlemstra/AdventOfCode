@@ -7,8 +7,40 @@ import (
     "strconv"
 )
 
+func getReversedPart(list []int, offset int, length int) []int {
+    result := make([]int, length)
+    target := length - 1
+    for i:=0; i < length; i++ {
+        source := (i + offset) % len(list)
+        result[target] = list[source]
+        target--
+    }
+    return result
+}
+
+func copyPart(list []int, part []int, offset int) {
+    index := offset
+    for _, item := range part {
+        list[index % len(list)] = item
+        index++
+    }
+}
+
 func KnotHash(list []int, input []int) int {
-    return len(input)
+    offset := 0
+    skipSize := 0
+    for _, length := range input {
+
+        if length > 1 {
+            part := getReversedPart(list, offset, length)
+            copyPart(list, part, offset)
+        }
+
+        offset = (offset + skipSize + length) % len(list)
+        skipSize++
+    }
+
+    return list[0] * list[1]
 }
 
 func ReadInput(fileName string) []int {
