@@ -26,3 +26,7 @@ For example:
   - ne,ne,sw,sw is 0 steps away (back where you started).
   - ne,ne,s,s is 2 steps away (se,se).
   - se,sw,se,sw,sw is 3 steps away (s,s,sw).
+
+# --- Part Two ---
+
+How many steps away is the furthest he ever got from his starting position?
