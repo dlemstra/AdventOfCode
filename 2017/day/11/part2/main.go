@@ -25,27 +25,32 @@ func max(a int, b int) int {
 func HexEd(input []string) int {
     x := 0
     y := 0
+    z := 0
 
     maxSteps := 0
     for _, str := range input {
         switch str {
             case "n":
-                x--
                 y++
+                z--
             case "ne":
-                y++
+                x++
+                z--
             case "se":
                 x++
+                y--
             case "s":
-                x++
+                z++
                 y--
             case "sw":
-                y--
+                z++
+                x--
             case "nw":
+                y++
                 x--
         }
 
-        maxSteps = max(maxSteps, max(abs(x), abs(y)))
+        maxSteps = max(maxSteps, max(abs(x), max(abs(y), abs(z))))
     }
 
     return maxSteps
