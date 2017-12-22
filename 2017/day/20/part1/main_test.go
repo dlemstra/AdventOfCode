@@ -14,5 +14,11 @@ func TestParticleSwarm(t *testing.T) {
 func TestParticleSwarm2(t *testing.T) {
     input := ReadInput("../test_input2")
     result := ParticleSwarm(input)
-    assert.Equal(t, 1, result)
+    assert.Equal(t, 0, result)
+}
+
+func TestParticleSwarm3(t *testing.T) {
+    input := ReadInput("../test_input3")
+    result := ParticleSwarm(input)
+    assert.Equal(t, 3, result)
 }
