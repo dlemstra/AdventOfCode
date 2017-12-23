@@ -35,14 +35,7 @@ i11:
         goto i30
     }
 
-    for e < b {
-        e ++
-        g += d
-        if e * d == b {
-            g = 0
-            goto next
-        }
-    }
+    goto next
 
     g = d        // set g d
     g *= e       // mul g e
