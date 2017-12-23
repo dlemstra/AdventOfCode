@@ -27,6 +27,23 @@ i8:
 i10:
     e = 2        // set e 2
 i11:
+    for b % d != 0 {
+        d++
+    }
+
+    if b == d {
+        goto i30
+    }
+
+    for e < b {
+        e ++
+        g += d
+        if e * d == b {
+            g = 0
+            goto next
+        }
+    }
+
     g = d        // set g d
     g *= e       // mul g e
     g -= b       // sub g b
@@ -34,6 +51,7 @@ i11:
         goto i16
     }
     f = 0        // set f 0
+    goto next
 i16:
     e -= -1      // sub e -1
     g = e        // set g e
@@ -50,6 +68,7 @@ i16:
     if f != 0 {  // jnz f 2
         goto i26
     }
+next:
     h -= -1      // sub h -1
 i26:
     g = b        // set g b
