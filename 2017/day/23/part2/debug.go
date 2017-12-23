@@ -44,7 +44,6 @@ i11:
         goto i16
     }
     f = 0        // set f 0
-    goto next
 i16:
     e -= -1      // sub e -1
     g = e        // set g e
