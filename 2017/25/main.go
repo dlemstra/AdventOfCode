@@ -25,37 +25,19 @@ type TuringMachine struct
     steps int
 
     pos int
-    ones []int
+    ones map[int]int
 
     states []State
 }
 
-func (machine TuringMachine) IsZero() bool {
-    for i := range machine.ones {
-        if machine.ones[i] == machine.pos {
-            return false
-        }
-    }
-
-    return true
-}
-
 func (machine *TuringMachine) WriteValue(value int) {
-    index := -1
-    for i := range machine.ones {
-        if machine.ones[i] == machine.pos {
-            index = i
-            break
-        }
-    }
-
     if value == 1 {
-        if index == -1 {
-            machine.ones = append(machine.ones, machine.pos)
+        if machine.ones[machine.pos] == 0 {
+            machine.ones[machine.pos] = 1
         }
     } else {
-        if index != -1 {
-            machine.ones = append(machine.ones[:index], machine.ones[index+1:]...)
+        if machine.ones[machine.pos] == 1 {
+            delete(machine.ones, machine.pos)
         }
     }
 }
@@ -66,7 +48,7 @@ func (machine *TuringMachine) Run() int {
     for machine.steps > 0 {
         state := machine.states[machine.index]
 
-        if machine.IsZero() {
+        if machine.ones[machine.pos] == 0 {
             machine.WriteValue(state.zeroValue)
             machine.pos += state.zeroStep
             machine.index = state.zeroNext
@@ -115,6 +97,7 @@ func ReadInput(fileName string) TuringMachine {
     defer file.Close()
 
     result := TuringMachine {}
+    result.ones = make(map[int]int)
 
     scanner := bufio.NewScanner(file)
 
