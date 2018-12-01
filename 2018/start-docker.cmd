@@ -1,0 +1,1 @@
+docker run -it -v %~dp0:/aoc ruby:2.5 /bin/bash
