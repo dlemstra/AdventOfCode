@@ -2,25 +2,10 @@ class Area
     def initialize(x, y, width, height)
         @x = x
         @y = y
-        @width = width
-        @height = height
+        @maxX = x + width - 1
+        @maxY = y + height - 1
     end
-
-    def x()
-        @x
-    end
-
-    def y()
-        @y
-    end
-
-    def maxX
-        @x + @width - 1
-    end
-
-    def maxY
-        @y + @height - 1
-    end
+    attr_reader :x, :y, :maxX, :maxY
 
     def intersects(other)
         if maxX < other.x or x > other.maxX

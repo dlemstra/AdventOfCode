@@ -3,29 +3,10 @@ class Area
         @id = id
         @x = x
         @y = y
-        @width = width
-        @height = height
+        @maxX = x + width - 1
+        @maxY = y + height - 1
     end
-
-    def id()
-        @id
-    end
-
-    def x()
-        @x
-    end
-
-    def y()
-        @y
-    end
-
-    def maxX
-        @x + @width - 1
-    end
-
-    def maxY
-        @y + @height - 1
-    end
+    attr_reader :id, :x, :y, :maxX, :maxY
 
     def intersects(other)
         if maxX < other.x or x > other.maxX
