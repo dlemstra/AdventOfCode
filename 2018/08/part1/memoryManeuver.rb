@@ -1,37 +1,17 @@
-class Node
-    def read(data)
+def metaDataSum(data)
+    child_count = data.shift
+    metadata_count = data.shift
 
-        @children = Array.new(data[0])
-        @metadata = Array.new(data[1])
-
-        offset = 2
-        for i in 0..@children.length - 1 do
-            child = Node.new
-            @children[i] = child
-
-            child.read(data[offset..-1])
-            offset += child.size
-        end
-
-        for i in 0..@metadata.length - 1 do
-            @metadata[i] = data[offset + i]
-        end
+    sum = 0
+    for i in 0..child_count - 1 do
+        sum += metaDataSum(data)
     end
 
-    def size
-        return 2 + @metadata.length + @children.sum(&:size)
-    end
-
-    def metadataSum
-        return @metadata.sum + @children.sum(&:metadataSum)
-    end
+    return sum + data.shift(metadata_count).sum
 end
 
 def memoryManeuver(input)
     data = input.map(&:to_i)
 
-    node = Node.new
-    node.read(data)
-
-    return node.metadataSum
+    return metaDataSum(data)
 end
