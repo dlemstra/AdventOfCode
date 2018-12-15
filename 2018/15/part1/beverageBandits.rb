@@ -1,0 +1,279 @@
+class QueueNode
+    def initialize(point, previous)
+        @point = point
+        @distance = 0
+        @steps = []
+
+        if !previous.nil?
+            @distance = previous.distance + 1
+            if distance > 1
+                @steps = previous.steps.dup
+                @steps.push(previous.point)
+            end
+        end
+    end
+    attr_reader :point, :distance, :steps
+
+    def firstStep
+        if distance == 1
+            return @point
+        else
+            return @steps[0]
+        end
+    end
+
+    def to_s
+        steps = @steps.map{|s| s.to_s}
+        return "#{@point} #{@distance} #{steps}"
+    end
+end
+
+class Point
+    def initialize(x, y)
+        @x = x
+        @y = y
+    end
+    attr_reader :x, :y
+
+    def ==(other)
+        return (other.x == x and other.y == y)
+    end
+
+    def nearest
+        return [Point.new(x, y - 1), Point.new(x - 1, y), Point.new(x + 1, y), Point.new(x, y + 1)]
+    end
+
+    def to_s
+        return "#{@x}x#{@y}"
+    end
+end
+
+class Unit
+    def initialize(type, position)
+        @type = type
+        @position = position
+        @hp = 200
+    end
+    attr_reader :type, :hp, :position
+
+    def x() position.x end
+    def y() position.y end
+    def isDead() @hp <= 0 end
+    def status() "#{@type}(#{@hp})" end
+    def sort_str() "#{position.y.to_s.rjust(2, '0')}x#{position.x.to_s.rjust(2, '0')}" end
+
+    def takeDamage
+        @hp -= 3
+    end
+
+    def attackTarget(grid, units)
+        targets = units.select{|unit| unit.type != type and !unit.isDead}
+        if targets.length == 0
+            return false
+        end
+
+        target = findTarget(targets)
+        if target.nil?
+            moveToBestTarget(grid, targets)
+            target = findTarget(targets)
+        end
+
+        if !target.nil?
+            target.takeDamage
+            if target.isDead
+                grid[target.y][target.x] = 0
+            end
+        end
+
+        return true
+    end
+
+    def to_s
+        return "#{status} #{@position}"
+    end
+
+    private
+
+    def findTarget(targets)
+        positions = @position.nearest
+        targets = targets.select{|target| positions.include?(target.position)}
+
+        if targets.length == 0
+            return nil
+        elsif targets.length == 1
+            return targets[0]
+        else
+            targets.sort_by{|target| target.hp}[0]
+        end
+    end
+
+    def moveToBestTarget(grid, targets)
+        maxDistance = grid.length * grid[0].length
+        bestTarget = nil
+        bestNode = nil
+
+        targets.each do |target|
+            src = @position
+            dst = target.position
+
+            best = nil
+            dst.nearest.each do |point|
+                node = breadthFirstSearch(grid, src, point, maxDistance)
+                if !node.nil?
+                    if best.nil? or node.distance < best.distance
+                        best = node
+                    end
+                end
+            end
+
+            if !best.nil?
+                if bestTarget.nil? or best.distance < maxDistance
+                    maxDistance = best.distance
+                    bestTarget = target
+                    bestNode = best
+                end
+            end
+        end
+
+        if !bestNode.nil?
+            destination = bestNode.firstStep
+            grid[@position.y][@position.x] = 0
+            @position = Point.new(destination.x, destination.y)
+            grid[@position.y][@position.x] = self
+        end
+    end
+
+    def breadthFirstSearch(grid, src, dst, maxDistance)
+        if grid[dst.y][dst.x] != 0
+            return nil
+        end
+
+        visited = Hash.new(0)
+        visited[src.to_s] = 1
+    
+        colNum = [-1,  0, 0, 1]
+        rowNum = [ 0, -1, 1, 0]
+
+        queue = Array.new
+        start = QueueNode.new(src, nil)
+        queue.push(start)
+
+        while queue.size != 0
+            current = queue.first
+            point = current.point
+
+            if point.x == dst.x and point.y == dst.y
+                return current
+            end
+
+            queue.shift
+
+            if current.distance < maxDistance
+                for i in 0..3
+                    x = point.x + rowNum[i]
+                    y = point.y + colNum[i]
+
+                    pos = Point.new(x, y)
+                    if grid[y][x] == 0 and visited[pos.to_s] == 0
+                        visited[pos.to_s] = 1
+
+                        cell = QueueNode.new(pos, current)
+                        queue.push(cell)
+                    end
+                end
+            end
+        end
+    
+        return nil
+    end
+end
+
+def executeRound(grid, units)
+    units.each do |unit|
+        if unit.isDead
+            next
+        end
+
+        if !unit.attackTarget(grid, units)
+            return false
+        end
+    end
+
+    return true
+end
+
+def printGrid(grid, units)
+    height = grid.length
+    width = grid[0].length
+
+    for y in 0..height-1
+        units_on_row = []
+        for x in 0..width-1
+            if grid[y][x] == 1
+                print '#'
+            elsif grid[y][x] == 0
+                print '.'
+            else
+                units_on_row.push(grid[y][x])
+                print grid[y][x].type
+            end
+        end
+
+        units_on_row.each do |unit|
+            print " #{unit.status}"
+        end
+        puts
+    end
+end
+
+def beverageBandits(input)
+    grid = []
+    units = []
+
+    y = 0
+    input.each do |line|
+        x = 0
+        grid.push([])
+        line.chars.each do |char|
+            case char
+            when '.'
+                grid[y][x] = 0
+            when '#'
+                grid[y][x] = 1
+            when 'G', 'E'
+                unit = Unit.new(char, Point.new(x, y))
+                units.push(unit)
+                grid[y][x] = unit
+            end
+            x += 1
+        end
+        y += 1
+    end
+
+    rounds = 0
+    while true
+        puts
+        printGrid(grid, units)
+
+        canContinue = executeRound(grid, units)
+
+        deadUnits = units.select{|unit| unit.isDead}
+        if deadUnits.length > 0
+            units -= deadUnits
+        end
+
+        if !canContinue
+            break
+        end
+
+        units = units.sort_by{|unit| unit.sort_str}
+
+        rounds += 1
+    end
+
+    puts
+    printGrid(grid, units)
+
+    puts "#{rounds} * #{units.map{|unit| unit.hp}.sum}"
+    return rounds * units.map{|unit| unit.hp}.sum
+end
