@@ -1,7 +1,7 @@
 require_relative "reposeRecord"
 
 def readInput()
-    File.readlines("input")
+    File.readlines("../input")
 end
 
 puts reposeRecord(readInput())
