@@ -66,18 +66,6 @@ def breadthFirstSearch(grid, src, dst)
     return nil
 end
 
-class Point
-    def initialize(x, y)
-        @x = x
-        @y = y
-    end
-    attr_reader :x, :y
-
-    def to_s
-        return "#{x}x#{y}"
-    end
-end
-
 def setPoint(map, x, y, char)
     if map["#{x}x#{y}"] == 0
         map["#{x}x#{y}"] = char
