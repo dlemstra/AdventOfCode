@@ -1,4 +1,4 @@
---- Day 20: A Regular Map ---
+## --- Day 20: A Regular Map ---
 
 While you were learning about instruction pointers, the Elves made considerable progress. When you look up, you discover that the North Pole base construction project has completely surrounded you.
 
@@ -38,6 +38,7 @@ This regex begins with ENWWW, which means that from your current position, all r
 
 After this point, there is (NEEE|SSE(EE|N)). This gives you exactly two options: NEEE and SSE(EE|N). By following NEEE, the map now looks like this:
 
+```
 #?#?#?#?#
 ?.|.|.|.?
 #-#?#?#?#
@@ -151,3 +152,9 @@ Furthest room requires passing 31 doors
 ```
 
 What is the largest number of doors you would be required to pass through to reach a room? That is, find the room for which the shortest path from your starting location to that room would require passing through the most doors; what is the fewest doors you can pass through to reach it?
+
+## --- Part Two ---
+
+Okay, so the facility is big.
+
+How many rooms have a shortest path from your current location that pass through at least 1000 doors?
