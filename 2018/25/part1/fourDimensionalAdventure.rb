@@ -34,7 +34,7 @@ def fourDimensionalAdventure(input)
         point = Point4.new(data[0], data[1], data[2], data[3])
 
         possible = []
-        constellations.each_with_index do |constellation,index|
+        constellations.each do |constellation|
             constellation.each do |other|
                 if point.isConnectedWith(other)
                     possible.push(constellation)
