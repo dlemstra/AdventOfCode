@@ -8,7 +8,19 @@ class Point4
     attr_reader :t, :x, :y, :z
 
     def isConnectedWith(other)
-        return ((other.t - @t).abs + (other.x - @x).abs + (other.y - @y).abs + (other.z - @z).abs) <= 3
+        total = (other.t - @t).abs
+        return false if total > 3
+
+        total += (other.x - @x).abs
+        return false if total > 3
+
+        total += (other.y - @y).abs
+        return false if total > 3
+
+        total += (other.z - @z).abs
+        return false if total > 3
+
+        return true
     end
 end
 
