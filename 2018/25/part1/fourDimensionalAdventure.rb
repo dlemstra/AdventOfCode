@@ -17,7 +17,6 @@ def fourDimensionalAdventure(input)
     constellations = []
 
     count = 0
-    prev = nil
     input.each do |line|
         data = line.split(",").map(&:to_i)
         point = Point4.new(data[0], data[1], data[2], data[3])
@@ -35,16 +34,14 @@ def fourDimensionalAdventure(input)
         if possible.length == 0
             constellations.push([point])
         else
-            possible[0].insert(0, point)
-            if possible.length > 1
-                possible[1..-1].each do |constellation|
-                    while constellation.length > 0
-                        possible[0].insert(0, constellation.shift)
-                    end
-                end
+            possible[0].push(point)
+            while possible.length != 1
+                constellation = possible.pop
+                possible[0].concat(constellation)
+                constellations.delete(constellation)
             end
         end
     end
 
-    return constellations.select{|constellation| constellation.count > 0}.count
+    return constellations.count
 end
