@@ -3,7 +3,7 @@ package aoc
 import java.io.File
 
 fun main(args: Array<String>) {
-    val lines = File("input").useLines { it }
+    val lines = File("../input").readLines()
 
-     println(helloWorld(lines))
+     println(theTyrannyOfTheRocketEquation(lines.asSequence()))
 }
