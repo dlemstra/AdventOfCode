@@ -9,8 +9,8 @@ class test() {
             checkEquals(50346, theTyrannyOfTheRocketEquation(arrayOf("100756").asSequence()))
         }
 
-    fun checkEquals(expected: Number, actual: Number) {
-        check(expected == actual) { "Expected '$expected' but got '$actual'." }
-    }
+        fun checkEquals(expected: Number, actual: Number) {
+            check(expected == actual) { "Expected '$expected' but got '$actual'." }
+        }
     }
 }
