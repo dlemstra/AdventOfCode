@@ -28,7 +28,7 @@ fun getPositions(input: String): List<Position> {
     return result;
 }
 
-fun crossedwWires(input: List<String>): Int {
+fun crossedWires(input: List<String>): Int {
     val positions1 = getPositions(input[0]);
     val positions2 = getPositions(input[1]);
 
