@@ -9,7 +9,7 @@ class Layer(width: Int, height: Int) {
       var offset = 0
       for (y in 0..height-1)
          for (x in 0..width-1)
-            pixels[y][x] = input[offset++].toString().toInt()
+            pixels[y][x] = input[offset++].toInt() - 48
    }
 
    fun findPixelsByValue(value: Int): Int {
