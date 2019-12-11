@@ -25,6 +25,9 @@ class Intcode(values: List<Long>) {
             if (opcode == 99L)
                 break
 
+            if (opcode == 3L && info[2] != 2)
+                info[2] = 1
+
             if (info[4] != 2)
                 info[4] = 1
 
