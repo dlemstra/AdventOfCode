@@ -17,7 +17,7 @@ let readInput =
         new input(min, max, data.[1].[0], data.[2])
     )
 
-let validPassword(input: input) =
+let validPasswordPart1(input: input) =
     let mutable count = 0
     for char in input.password do
         if char = input.char then
@@ -29,12 +29,30 @@ let part1 =
 
     let mutable valid = 0
     for input in inputs do
-        if validPassword input then
+        if validPasswordPart1 input then
             valid <- valid + 1
     valid
 
+let validPasswordPart2(input: input) =
+    let first = input.password.[input.min - 1]
+    let second = input.password.[input.max - 1]
+
+    if first = input.char && second = input.char then
+        false
+    else
+        first = input.char || second = input.char
+
+let part2 =
+    let inputs = readInput
+
+    let mutable valid = 0
+    for input in inputs do
+        if validPasswordPart2 input then
+            valid <- valid + 1
+    valid
 
 [<EntryPoint>]
 let main argv =
     printfn "%d" part1
+    printfn "%d" part2
     0
