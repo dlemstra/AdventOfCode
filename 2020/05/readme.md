@@ -10,14 +10,14 @@ The first `7` characters will either be `F` or `B`; these specify exactly one of
 
 For example, consider just the first seven characters of `FBFBBFFRLR`:
 
-Start by considering the whole range, rows `0` through `127`.
-`F` means to take the lower half, keeping rows `0` through `63`.
-`B` means to take the upper half, keeping rows `32` through `63`.
-`F` means to take the lower half, keeping rows `32` through `47`.
-`B` means to take the upper half, keeping rows `40` through `47`.
-`B` keeps rows `44` through `47`.
-`F` keeps rows `44` through `45`.
-The final F keeps the lower of the two, row `44`.
+   - Start by considering the whole range, rows `0` through `127`.
+   - `F` means to take the lower half, keeping rows `0` through `63`.
+   - `B` means to take the upper half, keeping rows `32` through `63`.
+   - `F` means to take the lower half, keeping rows `32` through `47`.
+   - `B` means to take the upper half, keeping rows `40` through `47`.
+   - `B` keeps rows `44` through `47`.
+   - `F` keeps rows `44` through `45`.
+   - The final F keeps the lower of the two, row `44`.
 
 The last three characters will be either `L` or `R`; these specify exactly one of the `8` columns of seats on the plane (numbered `0` through `7`). The same process as above proceeds again, this time with only three steps. `L` means to keep the lower half, while `R` means to keep the upper half.
 
@@ -34,9 +34,9 @@ Every seat also has a unique seat ID: multiply the row by `8`, then add the colu
 
 Here are some other boarding passes:
 
-`BFFFBBFRRR`: row `70`, column `7`, seat ID `567`.
-`FFFBBBFRRR`: row `14`, column `7`, seat ID `119`.
-`BBFFBBFRLL`: row `102`, column `4`, seat ID `820`.
+   - `BFFFBBFRRR`: row `70`, column `7`, seat ID `567`.
+   - `FFFBBBFRRR`: row `14`, column `7`, seat ID `119`.
+   - `BBFFBBFRLL`: row `102`, column `4`, seat ID `820`.
 
 As a sanity check, look through your list of boarding passes. What is the highest seat ID on a boarding pass?
 
