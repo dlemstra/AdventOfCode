@@ -2,8 +2,8 @@
 
 open System.IO
 
-type input(data: list<char>) =
-    member this.data = data
+type input(lines: list<string>) =
+    member this.lines = lines
 
 let read = seq<input> {
     let lines = File.ReadAllLines("..\..\..\input")
@@ -14,6 +14,6 @@ let read = seq<input> {
             yield input(data)
             data <- []
         else
-            data <- (line.ToCharArray() |> List.ofArray) @ data
+            data <- line :: data
     yield input(data)
 }
