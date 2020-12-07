@@ -8,7 +8,6 @@ type input(rule: string) =
 let read = seq<input> {
     let lines = File.ReadAllLines("..\..\..\input")
 
-    let mutable data = []
     for line in lines do
         yield input(line)
 }
