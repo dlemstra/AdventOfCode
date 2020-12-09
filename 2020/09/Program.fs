@@ -5,6 +5,7 @@ let main _ =
     let part1 = Part1.execute inputs
     printfn "Part1: %d" part1
 
-    let part2 = Part2.execute inputs
+    let part2 = Part2.execute (inputs, part1)
     printfn "Part2: %d" part2
+
     0
