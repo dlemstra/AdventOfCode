@@ -5,15 +5,6 @@ open System
 
 type direction = North | East | South | West
 
-let rotateAngle(current: int, degrees: int) =
-    let newAngle = current + degrees
-    if newAngle >= 360 then
-        newAngle - 360
-    elif newAngle < 0 then
-        360 + newAngle
-    else
-        newAngle
-
 type ship() =
     let mutable x = 0
     let mutable y = 0
@@ -33,7 +24,7 @@ type ship() =
             | South -> 180
             | West -> 270
         this.direction <-
-            match rotateAngle(currentAngle, degrees) with
+            match (currentAngle + degrees) % 360 with
             | 0 ->  North
             | 90 -> East
             | 180 -> South
@@ -53,7 +44,7 @@ let execute(inputs: seq<input>) =
             | 'E' -> ship.move(value, East)
             | 'S' -> ship.move(value, South)
             | 'W' -> ship.move(value, West)
-            | 'L' -> ship.rotate(-value)
+            | 'L' -> ship.rotate(360 - value)
             | 'R' -> ship.rotate(value)
             | 'F' -> ship.move(value)
             | _ -> failwithf "Unknown instruction"
