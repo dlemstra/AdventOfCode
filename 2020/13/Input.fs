@@ -3,13 +3,27 @@
 open System.IO
 open System
 
-type input(timestamp: int, ids: seq<int>) =
+type bus(id: int64, offset: int64) =
+    member this.id = id
+    member this.offset = offset
+
+type input(timestamp: int64, busses: seq<bus>) =
     member this.timestamp = timestamp
-    member this.ids = ids
+    member this.busses = busses
+
+let readBusses(line: string) = seq<bus> {
+    let ids = line.Split(',')
+    for i = 0 to ids.Length - 1 do
+        let id = ids.[i]
+        if id <> "x" then
+            yield bus(Int64.Parse id, int64 i)
+
+}
 
 let read =
     let lines = File.ReadAllLines("..\..\..\input")
 
-    let timestamp = Int32.Parse lines.[0]
-    let ids = lines.[1].Split(',') |> Seq.filter(fun x -> x <> "x") |> Seq.map Int32.Parse
-    input(timestamp, ids)
+    let timestamp = Int64.Parse lines.[0]
+    let busses = readBusses lines.[1]
+
+    input(timestamp, busses)
