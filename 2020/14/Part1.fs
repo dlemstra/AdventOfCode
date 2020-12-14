@@ -32,6 +32,6 @@ let execute(inputs: seq<input>) =
         match input.action.[1] with
             | 'a' -> mask <- readMask input.action
             | 'e' -> setMemory(memory, mask, input.action)
-            | _ -> failwithf "Unknown action"
+            | _ -> failwith "unknown action"
 
     memory.Values |> Seq.sum
