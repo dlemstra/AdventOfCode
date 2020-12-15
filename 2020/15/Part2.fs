@@ -3,7 +3,13 @@
 open Input
 open System.Collections.Generic
 
-type spoken = { mutable prev: int; mutable last: int }
+type spoken(number: int) =
+    let mutable prev = number
+    let mutable last = number
+    member this.age = last - prev
+    member this.updateLast(turn: int) =
+        prev <- last
+        last <- turn
 
 let execute(input: input) =
     let numbers = new Dictionary<int, spoken>()
@@ -12,22 +18,16 @@ let execute(input: input) =
     let mutable last = -1
     for number in input.numbers do
         last <- number
-        numbers.[last] <- { prev = turn; last = turn }
+        numbers.[last] <- spoken(turn)
         turn <- turn + 1
 
     while turn <= 30000000 do
-        let spoken = numbers.[last]
-
-        if spoken.prev = spoken.last then
-            last <- 0
-        else
-            last <- spoken.last - spoken.prev
+        last <- numbers.[last].age
 
         if numbers.ContainsKey(last) then
-            numbers.[last].prev <- numbers.[last].last
-            numbers.[last].last <- turn
+            numbers.[last].updateLast turn
         else
-            numbers.[last] <- { prev = turn; last = turn }
+            numbers.[last] <- spoken(turn)
 
         turn <- turn + 1
 
