@@ -17,6 +17,10 @@ let read =
         rules <- rules @ [(Int32.Parse info.[0], info.[1].Trim())]
         i <- i + 1
 
-    let patterns = Seq.sort rules |> Seq.map (fun (_, pattern) -> pattern) |> Seq.toList
+    let maxIndex = rules |> Seq.map (fun (index, _) -> index) |> Seq.max
 
-    input(patterns, Seq.skip (i + 1) lines |> Seq.toList)
+    let mutable patterns = Array.zeroCreate<string> (maxIndex + 1)
+    for index, pattern in rules do
+        patterns.[index] <- pattern
+
+    input(patterns |> Seq.toList, Seq.skip (i + 1) lines |> Seq.toList)
