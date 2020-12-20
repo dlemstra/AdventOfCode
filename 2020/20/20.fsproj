@@ -8,12 +8,11 @@
   <ItemGroup>
     <None Include="input" />
     <None Include="readme.md" />
+    <Compile Include="Types.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="Part1.fs" />
     <Compile Include="Part2.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
 </Project>
