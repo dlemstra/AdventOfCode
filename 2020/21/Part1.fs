@@ -45,4 +45,4 @@ let execute(inputs: seq<input>) =
         let notTranslated = input.words |> Seq.filter (fun word -> not(Seq.contains word translatedWords))
         total <- total + Seq.length notTranslated
 
-    total
+    (total, translations)

@@ -1,6 +1,6 @@
 ﻿module Part2
 
-open Input
+open System.Collections.Generic
 
-let execute(inputs: seq<input>) =
-    0
+let execute(translations: Dictionary<string, string>) =
+    translations |> Seq.sortBy (fun keyValue -> keyValue.Key) |> Seq.map (fun keyValue -> keyValue.Value) |> String.concat ","
