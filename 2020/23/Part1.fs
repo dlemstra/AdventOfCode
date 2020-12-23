@@ -2,86 +2,59 @@
 
 open Input
 open System
+open System.Collections.Generic
 
-let print(numbers: int[], move: int, current: int, destination: int) =
-    printfn "-- move %d --" move
-    printf "cups: "
-    for i = 0 to numbers.Length - 1 do
-        if i = current then
-            printf "(%d) " numbers.[i]
-        else
-            printf "%d "  numbers.[i]
-    printfn ""
-    printf "pick up: "
-    for i = current + 1 to current + 3 do
-        printf "%d " numbers.[i % numbers.Length]
-    printfn ""
-    printfn "destination: %d" destination
-    printfn ""
-
-let rec findDestination(numbers: int[], current: int, destination: int) =
+let rec findDestination(cups: LinkedListNode<int> seq, destination: int, size: int) =
     if destination = 0 then
-        findDestination(numbers, current, Seq.max numbers)
+        findDestination(cups, size, size)
     else
         let mutable found = false
-        for i = 1 to 3 do
-            if numbers.[(current + i) % numbers.Length] = destination then found <- true
+        for cup in cups do
+            if cup.Value = destination then found <- true
 
-        if found then findDestination(numbers, current, destination - 1) else destination
+        if found then findDestination(cups, destination - 1, size) else destination
+
+let getNext(cup: LinkedListNode<int>) =
+    if cup.Next <> null then cup.Next else cup.List.First
+
+let getNextCups(cup: LinkedListNode<int>) = seq {
+    let mutable next = getNext(cup)
+    for i = 1 to 3 do
+        yield next
+        next <- getNext(next)
+}
 
 let execute(input: input) =
-    let mutable size = Seq.length input.numbers
+    let size = (Seq.length input.numbers)
+    let mutable cupList = new LinkedList<int>();
+    let mutable indexes = new Dictionary<int, LinkedListNode<int>>()
 
-    let mutable current = 0
-    let mutable numbers = Array.zeroCreate size
-
+    let mutable index = 0
     for number in input.numbers do
-        numbers.[current] <- number
-        current <- current + 1
+        indexes.[number] <- cupList.AddLast(number)
+        index <- index + 1
 
-    current <- 0
-    let mutable destinationCup = 0
+    let mutable current = cupList.First
 
-    for move in 1 .. 100 do
-        destinationCup <- findDestination(numbers, current, numbers.[current] - 1)
+    for _ in 1 .. 100 do
+        let nextCups = getNextCups(current) |> Seq.toList
+        let destination = findDestination(nextCups, current.Value - 1, size)
 
-        // print(numbers, move, current, destinationCup)
+        let target = indexes.[destination]
 
-        let newNumbers = Array.zeroCreate size
-        for i = 4 to size do
-            let source = (current + i) % size
-            let target = (current + size + i - 3) % size
-            newNumbers.[target] <- numbers.[source]
+        for cup in nextCups do
+            cupList.Remove(cup)
 
-        let index = ((newNumbers |> Seq.findIndex (fun number -> number = destinationCup)) + 1) % size
+        for cup in (Seq.rev nextCups) do
+            cupList.AddAfter(target, cup)
 
-        let mutable lastZero = (index + size - 1) % size
-        while newNumbers.[lastZero] <> 0 do
-            lastZero <- (lastZero + size - 1) % size
-
-        let stop = (index + 2) % size
-
-        let mutable i = lastZero
-
-        while i <> stop do
-            let source = (i + size - 3) % size
-            let target = i
-            newNumbers.[target] <- newNumbers.[source]
-            i <- (i + size - 1) % size
-
-        for i = 0 to 2 do
-            let source = (current + 1 + i) % size
-            let target = (index + i) % size
-            newNumbers.[target] <- numbers.[source]
-
-        numbers <- newNumbers
-
-        current <- (current + 1) % size
-
-    let indexOfOne = numbers |> Seq.findIndex (fun number -> number = 1)
+        current <- getNext(current)
 
     let mutable result = ""
-    for i = 1 to size - 1 do
-        result <- result + numbers.[(indexOfOne + i) % size].ToString()
+
+    current <- indexes.[1].Next
+    while current <> indexes.[1] do
+        result <- result + current.Value.ToString()
+        current <- getNext(current)
 
     Int32.Parse(result)
