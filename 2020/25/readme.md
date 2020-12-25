@@ -36,3 +36,17 @@ For example, suppose you know that the card's public key is `5764801`. With a li
 Then, suppose you know that the door's public key is `17807724`. By the same process, you can determine that the door's loop size is `11`, because transforming the initial subject number of `7` with a loop size of `11` produces `17807724`.
 
 At this point, you can use either device's loop size with the other device's public key to calculate the encryption key. Transforming the subject number of `17807724` (the door's public key) with a loop size of `8` (the card's loop size) produces the encryption key, `14897079`. (Transforming the subject number of `5764801` (the card's public key) with a loop size of `11` (the door's loop size) produces the same encryption key: `14897079`.)
+
+## --- Part Two ---
+
+The light turns green and the door unlocks. As you collapse onto the bed in your room, your pager goes off!
+
+"It's an emergency!" the Elf calling you explains. "The soft serve machine in the cafeteria on sub-basement 7 just failed and you're the only one that knows how to fix it! We've already dispatched a reindeer to your location to pick you up."
+
+You hear the sound of hooves landing on your balcony.
+
+The reindeer carefully explores the contents of your room while you figure out how you're going to pay the 50 stars you owe the resort before you leave. Noticing that you look concerned, the reindeer wanders over to you; you see that it's carrying a small pouch.
+
+"Sorry for the trouble," a note in the pouch reads. Sitting at the bottom of the pouch is a gold coin with a little picture of a starfish on it.
+
+Looks like you only needed 49 stars after all.
