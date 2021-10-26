@@ -1,0 +1,10 @@
+root = true
+
+[*]
+
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+indent_size = 4
+tab_width = 4
