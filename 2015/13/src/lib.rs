@@ -49,20 +49,20 @@ fn read_people(input: Vec<String>) -> Vec<Person> {
     return people;
 }
 
-pub fn optimal_seating_arrangement_1(input: Vec<String>) -> i64 {
+fn get_best_happiness(all_people: &Vec<Person>) -> i64 {
     let mut best_happiness: i64 = 0;
-    let all_people = read_people(input);
-
     for people in all_people.iter().permutations(all_people.len()).unique() {
         let mut happiness: i64 = 0;
         for (pos, person) in people.iter().enumerate() {
-            let prev = if pos == 0 { people.len() - 1 } else { pos - 1 };
-            if let Some(prev_happiness) = person.happiness.get(&people[prev].name) {
-                happiness = happiness + prev_happiness;
-            }
-            let next = if pos == people.len() - 1 { 0 } else { pos + 1 };
-            if let Some(next_happiness) = person.happiness.get(&people[next].name) {
-                happiness = happiness + next_happiness;
+            if person.happiness.len() > 0 {
+                let prev = if pos == 0 { people.len() - 1 } else { pos - 1 };
+                if let Some(prev_happiness) = person.happiness.get(&people[prev].name) {
+                    happiness = happiness + prev_happiness;
+                }
+                let next = if pos == people.len() - 1 { 0 } else { pos + 1 };
+                if let Some(next_happiness) = person.happiness.get(&people[next].name) {
+                    happiness = happiness + next_happiness;
+                }
             }
         }
         if happiness > best_happiness {
@@ -70,7 +70,17 @@ pub fn optimal_seating_arrangement_1(input: Vec<String>) -> i64 {
         }
     }
 
-    return best_happiness
+    return best_happiness;
+}
+
+pub fn optimal_seating_arrangement(input: Vec<String>) -> (i64, i64) {
+    let mut all_people = read_people(input);
+    let part1 = get_best_happiness(&all_people);
+
+    all_people.push(Person{name: String::from("Me"), happiness: HashMap::new()});
+    let part2 = get_best_happiness(&all_people);
+
+    return (part1, part2);
 }
 
 pub fn read_input(file_name: &str) -> Vec<String> {

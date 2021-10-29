@@ -5,7 +5,7 @@ use main::*;
 
 #[test]
 fn test_optimal_seating_arrangement_1() {
-    let happiness = optimal_seating_arrangement_1(
+    let (happiness, _) = optimal_seating_arrangement(
     vec![
         String::from("Alice would gain 54 happiness units by sitting next to Bob."),
         String::from("Alice would lose 79 happiness units by sitting next to Carol."),
