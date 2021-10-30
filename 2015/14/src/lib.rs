@@ -3,10 +3,16 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use std::str;
 
+#[derive(Default)]
 struct Reindeer {
     km: i32,
     duration: i32,
     rest : i32,
+
+    distance: i32,
+    remaining_duration: i32,
+    remaining_rest: i32,
+    points: i32
 }
 
 fn read_reindeers(input: &Vec<String>) -> Vec<Reindeer> {
@@ -18,44 +24,61 @@ fn read_reindeers(input: &Vec<String>) -> Vec<Reindeer> {
         let km: i32 = info[3].parse().unwrap();
         let duration: i32 = info[6].parse().unwrap();
         let rest: i32 = info[13].parse().unwrap();
-        reindeers.push(Reindeer{km, duration, rest});
+        let remaining_duration = duration;
+        reindeers.push(Reindeer{km, duration, rest, remaining_duration, .. Default::default()});
     }
 
     return reindeers;
 }
 
-fn get_distance(reindeer: &Reindeer, total_seconds: i32) -> i32 {
-    let mut distance = 0;
-    let mut seconds = 0;
-
-    while seconds < total_seconds {
-        let mut steps = reindeer.duration;
-
-        seconds = seconds + steps;
-        if seconds > total_seconds {
-            steps = steps - (seconds - total_seconds);
+fn take_step(reindeer: &mut Reindeer) {
+    if reindeer.remaining_rest > 0 {
+        reindeer.remaining_rest = reindeer.remaining_rest - 1;
+        if reindeer.remaining_rest == 0 {
+            reindeer.remaining_duration = reindeer.duration;
         }
-
-        distance = distance + (steps * reindeer.km);
-
-        seconds = seconds + reindeer.rest
+    } else {
+        reindeer.distance = reindeer.distance + reindeer.km;
+        reindeer.remaining_duration = reindeer.remaining_duration - 1;
+        if reindeer.remaining_duration == 0 {
+            reindeer.remaining_rest = reindeer.rest;
+        }
     }
-
-    return distance;
 }
 
-pub fn reindeer_olympics(input: &Vec<String>, total_seconds: i32) -> i32 {
-    let reindeers = read_reindeers(input);
+pub fn reindeer_olympics(input: &Vec<String>, total_seconds: i32) -> (i32, i32) {
+    let mut reindeers = read_reindeers(input);
     let mut best_distance = 0;
+    let mut most_points = 0;
 
-    for reindeer in reindeers {
-        let distance = get_distance(&reindeer, total_seconds);
-        if distance > best_distance {
-            best_distance = distance;
+    for _ in 0..total_seconds {
+        for reindeer in &mut reindeers {
+            take_step(reindeer);
+        }
+        let mut max_distance = 0;
+        for reindeer in &reindeers {
+            if reindeer.distance > max_distance {
+                max_distance = reindeer.distance;
+            }
+        }
+
+        for reindeer in &mut reindeers {
+            if reindeer.distance == max_distance {
+                reindeer.points = reindeer.points + 1;
+            }
         }
     }
 
-    return best_distance;
+    for reindeer in &reindeers {
+        if reindeer.distance > best_distance {
+            best_distance = reindeer.distance;
+        }
+        if reindeer.points > most_points {
+            most_points = reindeer.points;
+        }
+    }
+
+    return (best_distance, most_points);
 }
 
 pub fn read_input(file_name: &str) -> Vec<String> {
