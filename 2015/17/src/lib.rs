@@ -4,12 +4,14 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 
-pub fn no_such_thing_as_too_much(input: &Vec<String>, total: i32) -> i32 {
+pub fn no_such_thing_as_too_much(input: &Vec<String>, total: i32) -> (i32, i32) {
     let mut sizes : Vec<i32> = vec![];
 
     for line in input {
         sizes.push(line.parse().unwrap());
     }
+
+    sizes.sort();
 
     let mut combinations = 0;
 
@@ -22,7 +24,23 @@ pub fn no_such_thing_as_too_much(input: &Vec<String>, total: i32) -> i32 {
         }
     }
 
-    return combinations;
+    let mut sizes2: Vec<&i32> = sizes.iter().clone().collect();
+    let mut sum = 0;
+    while sum < total {
+        sum = sum + sizes2.pop().unwrap();
+    }
+
+    let mut ways = 0;
+
+    let n = sizes.len() - sizes2.len();
+    for size in sizes.iter().combinations(n) {
+        let count = size.iter().fold(0i32, |a, b| a + *b);
+        if count == total {
+            ways = ways + 1;
+        }
+    }
+
+    return (combinations, ways);
 }
 
 pub fn read_input(file_name: &str) -> Vec<String> {
