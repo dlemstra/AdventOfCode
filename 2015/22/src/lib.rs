@@ -33,7 +33,14 @@ impl State {
         return State{player: self.player, boss: self.boss, mana_used: self.mana_used, effects: self.effects.to_vec()};
     }
 
-    fn play_round(&mut self, item: &Item) -> bool {
+    fn play_round(&mut self, item: &Item, hard_mode: bool) -> bool {
+        if hard_mode {
+            self.player.hitpoints -= 1;
+            if self.player.hitpoints == 0 {
+                return false;
+            }
+        }
+
         self.apply_affects();
         if self.boss.hitpoints <= 0 {
             return false;
@@ -99,7 +106,7 @@ impl State {
     }
 }
 
-pub fn wizard_simulator_20xx(boss_hitpoints: i32, boss_damage: i32) -> i32 {
+fn play_game(boss_hitpoints: i32, boss_damage: i32, hard_mode: bool) -> i32 {
     let items = [
         Item{id: 0, cost:  53, damage: 4, armor: 0, heal: 0, mana:   0, duration: 1},
         Item{id: 1, cost:  73, damage: 2, armor: 0, heal: 2, mana:   0, duration: 1},
@@ -128,7 +135,7 @@ pub fn wizard_simulator_20xx(boss_hitpoints: i32, boss_damage: i32) -> i32 {
             for item in items.iter() {
                 let mut new_state = state.clone();
 
-                if !new_state.play_round(&item) {
+                if !new_state.play_round(&item, hard_mode) {
                     if new_state.player.hitpoints > 0 && new_state.boss.hitpoints <= 0 {
                         if new_state.mana_used < best_mana {
                             best_mana = new_state.mana_used;
@@ -143,4 +150,11 @@ pub fn wizard_simulator_20xx(boss_hitpoints: i32, boss_damage: i32) -> i32 {
     }
 
     return best_mana;
+}
+
+pub fn wizard_simulator_20xx(boss_hitpoints: i32, boss_damage: i32) -> (i32, i32) {
+    let part1 = play_game(boss_hitpoints, boss_damage, false);
+    let part2 = play_game(boss_hitpoints, boss_damage, true);
+
+    return (part1, part2);
 }
