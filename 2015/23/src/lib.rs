@@ -3,21 +3,22 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 
-fn get_value(registers: &HashMap<&str, i32>, register: &str) -> i32 {
+fn get_value(registers: &HashMap<&str, i64>, register: &str) -> i64 {
     match registers.get(register) {
         None => 0,
         Some(value) => *value
     }
 }
 
-pub fn opening_the_turing_lock(input: &Vec<String>, result_register: &str) -> i32 {
-    let mut registers: HashMap<&str, i32> = HashMap::new();
+pub fn opening_the_turing_lock(input: &Vec<String>, start_value: i64, result_register: &str) -> i64 {
+    let mut registers: HashMap<&str, i64> = HashMap::new();
+    registers.insert("a", start_value);
 
-    let mut index: i32 = 0;
-    while index >= 0 && index  < input.len() as i32 {
+    let mut index: i64 = 0;
+    while index >= 0 && index  < input.len() as i64 {
         let line = &input[index as usize];
         let register = &line[4..5];
-        let mut increment: i32 = 1;
+        let mut increment: i64 = 1;
         match &line[0..3] {
             "hlf" => { *registers.entry(register).or_insert(0) /= 2; },
             "tpl" => { *registers.entry(register).or_insert(0) *= 3; },

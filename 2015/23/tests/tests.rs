@@ -11,7 +11,7 @@ fn test_opening_the_turing_lock() {
         String::from("jio a, +2"),
         String::from("tpl a"),
         String::from("inc a")
-    ], "a");
+    ], 0, "a");
 
     assert_eq!(2, part1);
 }
