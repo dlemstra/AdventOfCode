@@ -4,21 +4,29 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::prelude::*;
 
-fn is_valid_remaining(numbers: &Vec<i64>, combinations: usize, expected_weight: i64) -> bool {
+fn is_valid_remaining(numbers: &Vec<i64>, combinations: usize, expected_weight: i64, groups: i64) -> bool {
     for start in numbers.iter().combinations(combinations) {
         let sum = start.iter().fold(0i64, |a, b| a + *b);
         if sum == expected_weight {
             let remaining: Vec<i64> = numbers.iter().filter(|x| !start.contains(&x)).cloned().collect();
-            let remaining_sum = remaining.iter().fold(0i64, |a, b| a + *b);
-            if remaining_sum == expected_weight {
-                return true;
+            if groups == 3 {
+                let remaining_sum = remaining.iter().fold(0i64, |a, b| a + *b);
+                if remaining_sum == expected_weight {
+                    return true;
+                }
+            } else {
+                for i in combinations..numbers.len() {
+                    if is_valid_remaining(&remaining, i, expected_weight, groups - 1) {
+                        return true;
+                    }
+                }
             }
         }
     }
     return false;
 }
 
-fn get_qe(numbers: &Vec<i64>, combinations: usize, expected_weight: i64) -> i64 {
+fn get_qe(numbers: &Vec<i64>, combinations: usize, expected_weight: i64, groups: i64) -> i64 {
     let mut best_qe = i64::MAX;
     for start in numbers.iter().combinations(combinations) {
         let sum = start.iter().fold(0i64, |a, b| a + *b);
@@ -27,7 +35,7 @@ fn get_qe(numbers: &Vec<i64>, combinations: usize, expected_weight: i64) -> i64 
             if qe < best_qe {
                 let remaining: Vec<i64> = numbers.iter().filter(|x| !start.contains(&x)).cloned().collect();
                 for i in combinations..numbers.len() {
-                    if is_valid_remaining(&remaining, i, expected_weight) {
+                    if is_valid_remaining(&remaining, i, expected_weight, groups) {
                         best_qe = qe;
                         break;
                     }
@@ -39,12 +47,12 @@ fn get_qe(numbers: &Vec<i64>, combinations: usize, expected_weight: i64) -> i64 
     return best_qe;
 }
 
-pub fn it_hangs_in_the_balance(input: &Vec<String>) -> i64 {
+pub fn it_hangs_in_the_balance(input: &Vec<String>, groups: i64) -> i64 {
     let numbers: Vec<i64> = input.iter().map(|x| x.parse().unwrap()).collect();
-    let expected_weight = numbers.iter().fold(0i64, |a, b| a + *b) / 3;
+    let expected_weight = numbers.iter().fold(0i64, |a, b| a + *b) / groups;
 
     for i in 2..numbers.len() {
-        let qe = get_qe(&numbers, i, expected_weight);
+        let qe = get_qe(&numbers, i, expected_weight, groups);
         if qe != i64::MAX {
             return qe;
         }

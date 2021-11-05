@@ -17,7 +17,7 @@ fn test_it_hangs_in_the_balance() {
         String::from("9"),
         String::from("10"),
         String::from("11")
-    ]);
+    ], 3);
 
     assert_eq!(99, part1);
 }
