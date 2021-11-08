@@ -18,10 +18,10 @@ module.exports = {
         instructions.forEach(instruction => {
             switch(instruction[0]) {
                 case 'R':
-                    direction += 1;
+                    direction += 1
                     break;
                 case 'L':
-                    direction -= 1;
+                    direction -= 1
                     break;
             }
 
@@ -55,6 +55,6 @@ module.exports = {
             }
         })
 
-        return [distance(x, y), part2];
+        return [distance(x, y), part2]
     }
 }
