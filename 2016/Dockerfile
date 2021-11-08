@@ -1,5 +1,5 @@
 FROM node:17
 
-COPY test.sh /bin/aoc-test
+COPY test.sh /bin/aoctest
 
-COPY run.sh /bin/aoc-run
+COPY run.sh /bin/aocrun
