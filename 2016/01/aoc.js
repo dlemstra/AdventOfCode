@@ -5,8 +5,12 @@ const directions = {
     West: 3,
 }
 
+const distance = (x, y) => Math.abs(x) + Math.abs(y)
+
 module.exports = {
     noTimeForATaxicab: function(input) {
+        const set = new Set()
+        let part2 = 0
         let direction = directions.North
         let x = 0
         let y = 0
@@ -26,22 +30,31 @@ module.exports = {
 
             let blocks = parseInt(instruction.substring(1))
 
-            switch(direction) {
-                case directions.North:
-                    y += blocks;
-                    break;
-                case directions.East:
-                    x += blocks;
-                    break;
-                case directions.South:
-                    y -= blocks;
-                    break;
-                case directions.West:
-                    x -= blocks;
-                    break;
+            while (blocks-- > 0) {
+                let pos = `${x}.${y}`
+                if (!set.has(pos)) {
+                    set.add(pos)
+                } else if (part2 == 0) {
+                    part2 = distance(x, y)
+                }
+
+                switch(direction) {
+                    case directions.North:
+                        y += 1;
+                        break;
+                    case directions.East:
+                        x += 1;
+                        break;
+                    case directions.South:
+                        y -= 1;
+                        break;
+                    case directions.West:
+                        x -= 1;
+                        break;
+                }
             }
         })
 
-        return Math.abs(x) + Math.abs(y);
+        return [distance(x, y), part2];
     }
 }
