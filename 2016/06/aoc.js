@@ -11,6 +11,19 @@ function getMax(object) {
     return maxKey
 }
 
+function getMin(object) {
+    let minKey = 0
+    let minValue = 100000
+    for (key in object) {
+        if (object[key] < minValue) {
+            minKey = key
+            minValue = object[key]
+        }
+    }
+
+    return minKey
+}
+
 module.exports = {
     signalsAndNoise: function(input) {
         var frequency = {}
@@ -24,11 +37,13 @@ module.exports = {
             }
         });
 
-        let message = ''
+        let message1 = ''
+        let message2 = ''
         for (index in frequency) {
-            message += getMax(frequency[index])
+            message1 += getMax(frequency[index])
+            message2 += getMin(frequency[index])
         }
 
-        return message
+        return [message1 , message2]
     }
 }
