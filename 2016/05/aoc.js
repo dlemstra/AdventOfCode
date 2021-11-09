@@ -6,19 +6,37 @@ const MD5=function(r){function n(o){if(t[o])return t[o].exports;var e=t[o]={i:o,
  */
 r.exports=function(r){return null!=r&&(t(r)||o(r)||!!r._isBuffer)}},function(r,n,t){r.exports=t(1)}]);
 
+String.prototype.replaceAt = function(index, replacement) {
+    return this.substr(0, index) + replacement + this.substr(index + replacement.length);
+}
+
 module.exports = {
     howAboutANiceGameOfChess: function(input) {
-        let password = ''
+        let password1 = ''
+        let password2 = '********'
         let i = 0
         while (i >= 0) {
             const hash = MD5(`${input}${i}`)
             if (hash.slice(0, 5) == '00000') {
-                password += hash[5]
-                if (password.length == 8) {
-                    return password
+                let pos = hash[5]
+                if (password1.length < 8) {
+                    password1 += pos
+                }
+
+                pos = parseInt(pos)
+                if (!isNaN(pos) && pos < 8) {
+                    if (password2[pos] == '*') {
+                        password2 = password2.replaceAt(pos, hash[6])
+                    }
+                }
+
+                if (password2.indexOf('*') == -1) {
+                    break;
                 }
             }
             i++
         }
+
+        return [password1, password2]
     }
 }
