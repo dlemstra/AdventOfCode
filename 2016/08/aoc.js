@@ -56,6 +56,6 @@ module.exports = {
             lit += grid[y].filter(c => c == '#').length
         }
 
-        return lit
+        return [lit, grid]
     }
 }
