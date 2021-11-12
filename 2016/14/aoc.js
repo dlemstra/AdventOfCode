@@ -26,19 +26,47 @@ function hasFiveOfAKind(hash, character) {
     return false
 }
 
+function getHash(hashes, input, index) {
+    if (hashes.length == index) {
+        hashes.push(MD5(`${input}${index}`))
+    }
+
+    return hashes[index]
+}
+
+function stretchedHash(value) {
+    for (let i = 0; i < 2017; i++) {
+        value = MD5(value)
+    }
+
+    return value
+}
+
+function getStretchedHash(hashes, input, index) {
+    if (hashes.length == index) {
+        hashes.push(stretchedHash(`${input}${index}`))
+    }
+
+    return hashes[index]
+}
+
 module.exports = {
     oneTimePad: function(input) {
         let part1 = 0
+        let part2 = 0
+
+        let hashes = []
         let count = 0
 
         while (count != 64) {
-            const hash = MD5(`${input}${part1}`)
+            const hash = getHash(hashes, input, part1)
             const character = findThreeOfAKind(hash)
             if (character != null) {
                 for (let i = part1 + 1; i < part1 + 1001; i++) {
-                    const otherHash = MD5(`${input}${i}`)
+                    const otherHash = getHash(hashes, input, i)
                     if (hasFiveOfAKind(otherHash, character)) {
                         count++
+                        process.stdout.write(`\rFound key ${count}`)
                         break
                     }
                 }
@@ -47,6 +75,30 @@ module.exports = {
             part1++
         }
 
-        return part1 - 1
+        console.log()
+
+        hashes = []
+        count = 0
+
+        while (count != 64) {
+            const hash = getStretchedHash(hashes, input, part2)
+            const character = findThreeOfAKind(hash)
+            if (character != null) {
+                for (let i = part2 + 1; i < part2 + 1001; i++) {
+                    const otherHash = getStretchedHash(hashes, input, i)
+                    if (hasFiveOfAKind(otherHash, character)) {
+                        count++
+                        process.stdout.write(`\rFound key ${count}`)
+                        break
+                    }
+                }
+            }
+
+            part2++
+        }
+
+        console.log()
+
+        return [part1 - 1, part2 - 1]
     }
 }
