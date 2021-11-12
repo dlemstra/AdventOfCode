@@ -21,21 +21,21 @@ function combinations(n, k) {
 }
 
 class Microchip {
-    constructor(element) {
-        this.name = `${element.toUpperCase()}M`
+    constructor(name) {
+        this.name = name.substring(0, 2).toUpperCase()
     }
 
     element() { return this.name[0] }
-    type() { return this.name[1] }
+    type() { return 'M' }
 }
 
 class Generator {
-    constructor(element) {
-        this.name = `${element.toUpperCase()}G`
+    constructor(name) {
+        this.name = name.substring(0, 2).toUpperCase()
     }
 
     element() { return this.name[0] }
-    type() { return this.name[1] }
+    type() { return 'G' }
 }
 
 class State {
@@ -58,7 +58,20 @@ class State {
     }
 
     newStates() {
-        return this.getNewStates(this.level + 1).concat(this.getNewStates(this.level - 1))
+        const states = this.getNewStates(this.level + 1)
+
+        let itemsBelow = 0
+        let level = this.level - 1
+        while (level >= 0) {
+            itemsBelow += this.floors[level].length
+            level--
+        }
+
+        if (itemsBelow == 0) {
+            return states
+        }
+
+        return states.concat(this.getNewStates(this.level - 1))
     }
 
     getNewStates(level) {
@@ -68,21 +81,23 @@ class State {
 
         const currentFloor = this.floors[this.level];
 
-        for (let i = 0; i < currentFloor.length; i++) {
-            const newState = this.copy()
-            const item = newState.floors[this.level][i]
+        if (level < this.level) {
+            for (let i = 0; i < currentFloor.length; i++) {
+                const newState = this.copy()
+                const item = newState.floors[this.level][i]
 
-            newState.floors[this.level].splice(i, 1)
-            newState.floors[level].push(item)
+                newState.floors[this.level].splice(i, 1)
+                newState.floors[level].push(item)
 
-            if (newState.isValidFloor(this.level) && newState.isValidFloor(level)) {
-                newState.steps++
-                newState.level = level
-                newStates.push(newState)
+                if (newState.isValidFloor(this.level) && newState.isValidFloor(level)) {
+                    newState.steps++
+                    newState.level = level
+                    newStates.push(newState)
+                }
             }
         }
 
-        if (currentFloor.length > 1) {
+        if (level > this.level && currentFloor.length > 1) {
             const options = combinations(currentFloor.length, 2)
             for (let i=0; i < options.length; i++) {
                 options[i].sort((a, b) => a - b)
@@ -141,6 +156,34 @@ class State {
     }
 }
 
+function minimumSteps(startState) {
+    const checksums = {}
+    checksums[startState.checksum()] = 1
+
+    const states = []
+    states.push(startState)
+
+    let result = 1000000
+    while (states.length > 0) {
+        const state = states[0]
+        states.splice(0, 1)
+
+        state.newStates().forEach(newState => {
+            const checksum = newState.checksum()
+            if (!checksums[checksum] || newState.steps < checksums[checksum]) {
+                checksums[checksum] = newState.steps
+                if (newState.done()) {
+                    result = Math.min(newState.steps, result)
+                } else {
+                    states.push(newState)
+                }
+            }
+        })
+    }
+
+    return result
+}
+
 module.exports = {
     radioisotopeThermoelectricGenerators : function(input) {
         const floors = []
@@ -151,9 +194,9 @@ module.exports = {
             for (let i=0; i < info.length; i++) {
                 if (info[i] == 'a') {
                     if (info[i + 2][0] == 'm') {
-                        floor.push(new Microchip(info[i + 1][0]))
+                        floor.push(new Microchip(info[i + 1]))
                     } else {
-                        floor.push(new Generator(info[i + 1][0]))
+                        floor.push(new Generator(info[i + 1]))
                     }
                 }
             }
@@ -162,31 +205,15 @@ module.exports = {
 
         const startState = new State(floors, 0, 0)
 
-        const checksums = {}
-        checksums[startState.checksum()] = 1
+        const part1 = minimumSteps(startState)
 
-        const states = []
-        states.push(startState)
+        startState.floors[0].push(new Generator('elerium'))
+        startState.floors[0].push(new Microchip('elerium'))
+        startState.floors[0].push(new Generator('dilithium'))
+        startState.floors[0].push(new Microchip('dilithium'))
 
-        let leastSteps = 1000000
-        while (states.length > 0) {
-            const state = states[0]
-            states.splice(0, 1)
+        const part2 = minimumSteps(startState)
 
-            state.newStates().forEach(newState => {
-                const checksum = newState.checksum()
-                if (!checksums[checksum] || newState.steps < checksums[checksum]) {
-                    newState.history.push()
-                    checksums[checksum] = newState.steps
-                    if (newState.done()) {
-                        leastSteps = Math.min(newState.steps, leastSteps)
-                    } else {
-                        states.push(newState)
-                    }
-                }
-            })
-        }
-
-        return leastSteps
+        return [part1, part2]
     }
 }

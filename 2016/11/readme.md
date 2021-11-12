@@ -23,6 +23,7 @@ The first floor contains a hydrogen-compatible microchip and a lithium-compatibl
 The second floor contains a hydrogen generator.
 The third floor contains a lithium generator.
 The fourth floor contains nothing relevant.
+```
 
 As a diagram (`F#` for a Floor number, `E` for Elevator, `H` for Hydrogen, `L` for Lithium, `M` for Microchip, and `G` for Generator), the initial state looks like this:
 
@@ -137,3 +138,18 @@ Then, to get everything up to the assembling machine on the fourth floor, the fo
 In this arrangement, it takes `11` steps to collect all of the objects at the fourth floor for assembly. (Each elevator stop counts as one step, even if nothing is added to or removed from it.)
 
 In your situation, what is the minimum number of steps required to bring all of the objects to the fourth floor?
+
+## --- Part Two ---
+
+You step into the cleanroom separating the lobby from the isolated area and put on the hazmat suit.
+
+Upon entering the isolated containment area, however, you notice some extra parts on the first floor that weren't listed on the record outside:
+
+ - An elerium generator.
+ - An elerium-compatible microchip.
+ - A dilithium generator.
+ - A dilithium-compatible microchip.
+
+These work just like the other generators and microchips. You'll have to get them up to assembly as well.
+
+What is the minimum number of steps required to bring all of the objects, including these four new ones, to the fourth floor?
