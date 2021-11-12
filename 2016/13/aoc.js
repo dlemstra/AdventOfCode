@@ -22,34 +22,53 @@ class Position {
     }
 }
 
+function minSteps(number, x, y) {
+    if (!isOpenSpace(number, x, y)) {
+        return 100000
+    }
+
+    const stepCount = { }
+    const start = new Position(1, 1, 0)
+
+    const positions = [start]
+    while (positions.length > 0) {
+        const position = positions.pop()
+
+        if (position.x > x + 10 && position.y > y + 10) {
+            continue
+        }
+
+        const key = `${position.x}x${position.y}`
+        if (stepCount[key] && stepCount[key] < position.steps) {
+            continue
+        } else {
+            stepCount[key] = position.steps
+
+            checkPosition(positions, number, position.x + 0, position.y + 1, position.steps + 1)
+            checkPosition(positions, number, position.x + 0, position.y - 1, position.steps + 1)
+            checkPosition(positions, number, position.x + 1, position.y + 0, position.steps + 1)
+            checkPosition(positions, number, position.x - 1, position.y + 0, position.steps + 1)
+        }
+    }
+
+    return stepCount[`${x}x${y}`]
+}
+
 module.exports = {
     aMazeOfTwistyLittleCubicles: function(input, x, y) {
         const number = parseInt(input)
 
-        const stepCount = { }
-        const start = new Position(1, 1, 0)
+        const part1 = minSteps(number, x, y)
 
-        const positions = [start]
-        while (positions.length > 0) {
-            const position = positions.pop()
-
-            if (position.x > x + 10 && position.y > y + 10) {
-                continue
-            }
-
-            const key = `${position.x}x${position.y}`
-            if (stepCount[key] && stepCount[key] < position.steps) {
-                continue
-            } else {
-                stepCount[key] = position.steps
-
-                checkPosition(positions, number, position.x + 0, position.y + 1, position.steps + 1)
-                checkPosition(positions, number, position.x + 0, position.y - 1, position.steps + 1)
-                checkPosition(positions, number, position.x + 1, position.y + 0, position.steps + 1)
-                checkPosition(positions, number, position.x - 1, position.y + 0, position.steps + 1)
+        let part2 = 0
+        for (let y=0; y < 25; y++) {
+            for (let x=0; x < 25; x++) {
+                if (minSteps(number, x, y) <= 50) {
+                    part2++
+                }
             }
         }
 
-        return stepCount[`${x}x${y}`]
+        return [part1, part2]
     }
 }
