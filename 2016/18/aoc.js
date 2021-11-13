@@ -1,29 +1,31 @@
-function isTrap(type1, type2, type3) {
-    const type = `${type1}${type2}${type3}`
-    return type == '^^.' || type == '.^^' || type == '^..' || type == '..^'
+function isTrap(type1, type3) {
+    if (type1 == '^') { return type3 == '.' }
+    if (type3 == '^') { return type1 == '.' }
+    return false
 }
 
 module.exports = {
     likeARogue: function(input, count) {
-        let rows = [input.trim()]
+        let previousRow = input.trim()
 
-        while (rows.length != count) {
+        let safeTiles = previousRow.split('').filter(tile => tile == '.').length
+
+        let row = 0
+        while (++row != count) {
             let newRow = ''
-            const previousRow = rows[rows.length - 1]
             for (let i = 0; i < previousRow.length; i++) {
                 const type1 = (i == 0) ? '.' : previousRow[i - 1]
-                const type2 = previousRow[i]
                 const type3 = (i == previousRow.length - 1) ? '.' : previousRow[i + 1]
 
-                newRow += isTrap(type1, type2, type3) ? '^' : '.'
+                if (isTrap(type1, type3)) {
+                    newRow += '^'
+                } else {
+                    newRow += '.'
+                    safeTiles++
+                }
             }
-            rows.push(newRow)
+            previousRow = newRow
         }
-
-        let safeTiles = 0
-        rows.forEach(row => {
-            safeTiles += row.split('').filter(tile => tile == '.').length
-        })
 
         return safeTiles
     }

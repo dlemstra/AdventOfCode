@@ -1,10 +1,10 @@
 const assert = require('assert')
 const aoc = require('./aoc')
 
-let part1_1 = aoc.likeARogue('..^^.', 3)
+let part1 = aoc.likeARogue('..^^.', 3, 3)
 
-assert.equal(part1_1, 6)
+assert.equal(part1, 6)
 
-let part1_2 = aoc.likeARogue('.^^.^.^^^^', 10)
+part1 = aoc.likeARogue('.^^.^.^^^^', 10)
 
-assert.equal(part1_2, 38)
+assert.equal(part1, 38)
