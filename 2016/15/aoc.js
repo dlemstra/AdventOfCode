@@ -18,31 +18,45 @@ function isDone(discs) {
     return true
 }
 
+function moveDiscs(discs) {
+    for (let i=0; i < discs.length; i++) {
+        for (let j=0; j < i; j++) {
+            discs[i].takeStep()
+        }
+    }
+
+    let time = 0
+    while (!isDone(discs)) {
+        for (let i=0; i < discs.length; i++) {
+            discs[i].takeStep()
+        }
+        time++
+    }
+
+    return time - 1
+}
+
+function createDiscs(input) {
+    const discs = []
+    input.split('\n').forEach(line => {
+        const info = line.replace('.', '').split(' ')
+        const position = parseInt(info[11])
+        const length = parseInt(info[3])
+        discs.push(new Disc(position, length))
+    });
+
+    return discs
+}
+
 module.exports = {
     timingIsEverything: function(input) {
-        const discs = []
+        let discs = createDiscs(input)
+        let part1 = moveDiscs(discs)
 
-        input.split('\n').forEach(line => {
-            const info = line.replace('.', '').split(' ')
-            const position = parseInt(info[11])
-            const length = parseInt(info[3])
-            discs.push(new Disc(position, length))
-        });
+        discs = createDiscs(input)
+        discs.push(new Disc(0, 11))
+        let part2 = moveDiscs(discs)
 
-        for (let i=0; i < discs.length; i++) {
-            for (let j=0; j < i; j++) {
-                discs[i].takeStep()
-            }
-        }
-
-        let time = 0
-        while (!isDone(discs)) {
-            for (let i=0; i < discs.length; i++) {
-                discs[i].takeStep()
-            }
-            time++
-        }
-
-        return time - 1
+        return [part1, part2]
     }
 }
