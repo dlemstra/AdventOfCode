@@ -33,28 +33,34 @@ function getSteps(passcode) {
 
         const hash = getHash(passcode, position.steps)
         const key = `${position.x}x${position.y}-${hash}`
-        if (stepCounts[key] && stepCounts[key].length < position.steps.length) {
-            continue
+        if (!stepCounts[key]) {
+            stepCounts[key] = [position.steps.join(''), position.steps.length]
         } else {
-            stepCounts[key] = position.steps
-            if (key.startsWith(target)) { continue }
-
-            if (isOpen(hash[0])) { positions.push(new Position(position.x + 0, position.y - 1, [...position.steps].concat(['U']))) }
-            if (isOpen(hash[1])) { positions.push(new Position(position.x + 0, position.y + 1, [...position.steps].concat(['D']))) }
-            if (isOpen(hash[2])) { positions.push(new Position(position.x - 1, position.y + 0, [...position.steps].concat(['L']))) }
-            if (isOpen(hash[3])) { positions.push(new Position(position.x + 1, position.y + 0, [...position.steps].concat(['R']))) }
+            let bestSteps = stepCounts[key][0]
+            const steps = position.steps.join('')
+            if (steps.length < bestSteps.length) { bestSteps = steps }
+            stepCounts[key] = [bestSteps, Math.max(position.steps.length, stepCounts[key][1])]
         }
+
+        if (key.startsWith(target)) { continue }
+
+        if (isOpen(hash[0])) { positions.push(new Position(position.x + 0, position.y - 1, [...position.steps].concat(['U']))) }
+        if (isOpen(hash[1])) { positions.push(new Position(position.x + 0, position.y + 1, [...position.steps].concat(['D']))) }
+        if (isOpen(hash[2])) { positions.push(new Position(position.x - 1, position.y + 0, [...position.steps].concat(['L']))) }
+        if (isOpen(hash[3])) { positions.push(new Position(position.x + 1, position.y + 0, [...position.steps].concat(['R']))) }
     }
 
     let part1 = ''
+    let part2 = 0
     Object.keys(stepCounts).filter(x => x.startsWith(target)).forEach(key => {
-        const steps = stepCounts[key].join('')
+        const steps = stepCounts[key][0]
         if (part1 == '' || steps.length < part1.length) {
             part1 = steps
         }
+        part2 = Math.max(part2, stepCounts[key][1])
     });
 
-    return part1
+    return [part1, part2]
 }
 
 module.exports = {
