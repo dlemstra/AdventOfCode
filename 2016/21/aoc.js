@@ -46,7 +46,7 @@ function permutations(array) {
     }
 
     return result
-  }
+}
 
 function parseInstructions(array, input) {
     input.split('\n').forEach(line => {
