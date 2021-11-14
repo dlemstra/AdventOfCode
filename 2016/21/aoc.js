@@ -30,42 +30,79 @@ function rotate(array, count, right) {
     }
 }
 
-module.exports = {
-    scrambledLettersAndHash: function(start, input) {
-        let result = start.split('')
-        input.split('\n').forEach(line => {
-            const info = line.trim().split(' ')
-            if (info[0][0] == 's') { // swap
-                if (info[1][0] == 'p') { // position
-                    const positions = [parseInt(info[2]), parseInt(info[5])]
-                    swapPositions(result, positions)
-                } else { // letter
-                    const positions = [result.indexOf(info[2]), result.indexOf(info[5])]
-                    swapPositions(result, positions)
-                }
-            } else if (info[0][0] == 'r') {
-                if (info[0][1] == 'e') { // reverse
-                    const start = parseInt(info[2])
-                    const end = parseInt(info[4]) + 1
-                    reverse(result, start, end - start)
-                } else { // rotate
-                    if (info[1][0] == 'b') { // based
-                        let count = result.indexOf(info[6]) + 1
-                        if (count > 4) { count++ }
-                        count = count % result.length
-                        rotate(result, count, true)
-                    } else {
-                        const right = info[1][0] == 'r'
-                        const count = parseInt(info[2])
-                        rotate(result, count, right)
-                    }
-                }
-            } else if (info[0][0] == 'm') { // move
-                const positions = [parseInt(info[2]), parseInt(info[5])]
-                moveValues(result, positions)
-            }
-        })
+function permutations(array) {
+    let result = []
 
-        return result.join('')
+    for (let i = 0; i < array.length; i++) {
+        let rest = permutations(array.slice(0, i).concat(array.slice(i + 1)))
+
+        if (!rest.length) {
+            result.push([array[i]])
+        } else {
+            for(let j = 0; j < rest.length; j++) {
+                result.push([array[i]].concat(rest[j]))
+            }
+        }
+    }
+
+    return result
+  }
+
+function parseInstructions(array, input) {
+    input.split('\n').forEach(line => {
+        const info = line.trim().split(' ')
+        if (info[0][0] == 's') { // swap
+            if (info[1][0] == 'p') { // position
+                const positions = [parseInt(info[2]), parseInt(info[5])]
+                swapPositions(array, positions)
+            } else { // letter
+                const positions = [array.indexOf(info[2]), array.indexOf(info[5])]
+                swapPositions(array, positions)
+            }
+        } else if (info[0][0] == 'r') {
+            if (info[0][1] == 'e') { // reverse
+                const start = parseInt(info[2])
+                const end = parseInt(info[4]) + 1
+                reverse(array, start, end - start)
+            } else { // rotate
+                if (info[1][0] == 'b') { // based
+                    let count = array.indexOf(info[6]) + 1
+                    if (count > 4) { count++ }
+                    count = count % array.length
+                    rotate(array, count, true)
+                } else {
+                    const right = info[1][0] == 'r'
+                    const count = parseInt(info[2])
+                    rotate(array, count, right)
+                }
+            }
+        } else if (info[0][0] == 'm') { // move
+            const positions = [parseInt(info[2]), parseInt(info[5])]
+            moveValues(array, positions)
+        }
+    })
+
+    return array.join('')
+}
+
+module.exports = {
+    scrambledLettersAndHash: function(input, start, scrambled) {
+        const array = start.split('')
+
+        const part1 =  parseInstructions([...array], input)
+
+        let part2 = ''
+        if (scrambled) {
+            const values = permutations(array)
+            for (let i = 0; i < values.length; i++) {
+                const result = parseInstructions([...values[i]], input)
+                if (result == scrambled) {
+                    part2 = values[i].join('')
+                    break
+                }
+            }
+        }
+
+        return [part1, part2]
     }
 }
