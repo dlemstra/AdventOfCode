@@ -1,10 +1,17 @@
 const assert = require('assert')
 const aoc = require('./aoc')
 
-let part1 = aoc.gridComputing(`root@ebhq-gridcenter# df -h
-Filesystem              Size  Used  Avail  Use%
-/dev/grid/node-x0-y0     92T    0T    19T   79%
-/dev/grid/node-x0-y1     91T   10T    25T   72%
-/dev/grid/node-x0-y2     85T   73T    12T   85%`)
+let [part1, part2] = aoc.gridComputing(`root@ebhq-gridcenter# df -h
+Filesystem            Size  Used  Avail  Use%
+/dev/grid/node-x0-y0   10T    8T     2T   80%
+/dev/grid/node-x0-y1   11T    6T     5T   54%
+/dev/grid/node-x0-y2   32T   28T     4T   87%
+/dev/grid/node-x1-y0    9T    7T     2T   77%
+/dev/grid/node-x1-y1    8T    0T     8T    0%
+/dev/grid/node-x1-y2   11T    7T     4T   63%
+/dev/grid/node-x2-y0   10T    6T     4T   60%
+/dev/grid/node-x2-y1    9T    8T     1T   88%
+/dev/grid/node-x2-y2    9T    6T     3T   66%`)
 
-assert.equal(part1, 2)
+assert.equal(part1, 5)
+assert.equal(part2, 7)
