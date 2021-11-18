@@ -132,7 +132,7 @@ module.exports = {
             instructions[outIndex].count = 0
             instructions[outIndex].value = 1
             testValueA(instructions, ++valueA)
-            if (instructions[outIndex].count >= 1000) { break }
+            if (instructions[outIndex].count == 1000) { break }
         }
 
         return valueA
