@@ -69,22 +69,26 @@ function getMinimalSteps(walls, startX, startY, endX, endY) {
     return stepCount[`${endX}x${endY}`]
 }
 
-function getTotalSteps(stepCounts, startNumber, array) {
-    const starts = array.filter(key => key.startsWith(`${startNumber}-`))
-    const remaining = array.filter(v => !(v.startsWith(`${startNumber}-`) || v.endsWith(`-${startNumber}`)))
+function permutator(inputArr) {
+    var results = []
 
-    let bestTotal = -1
-    for (let i=0; i < starts.length; i++) {
-        let total = stepCounts[starts[i]]
-        if (remaining.length > 0) {
-            let number = starts[i].split('-')[1]
-            total += getTotalSteps(stepCounts, number, remaining)
+    function permute(arr, memo) {
+      var cur, memo = memo || []
+
+      for (var i = 0; i < arr.length; i++) {
+        cur = arr.splice(i, 1)
+        if (arr.length === 0) {
+          results.push(memo.concat(cur))
         }
-        if (bestTotal == -1 || total < bestTotal) { bestTotal = total }
+        permute(arr.slice(), memo.concat(cur))
+        arr.splice(i, 0, cur[0])
+      }
+
+      return results
     }
 
-    return bestTotal
-}
+    return permute(inputArr)
+  }
 
 module.exports = {
     airDuctSpelunking: function(input) {
@@ -114,6 +118,20 @@ module.exports = {
             stepCounts[`${numberB.value}-${numberA.value}`] = steps
         })
 
-        return getTotalSteps(stepCounts, 0, Object.keys(stepCounts))
+        let part1 = Number.MAX_VALUE
+        let part2 = Number.MAX_VALUE
+        const allSteps = permutator(numbers).filter(array => array[0].value == 0)
+        for (let i=0; i < allSteps.length; i++) {
+            const steps = allSteps[i]
+            let total = 0
+            for (let j=1; j < steps.length; j++) {
+                total += stepCounts[`${steps[j-1].value}-${steps[j].value}`]
+            }
+
+            part1 = Math.min(part1, total)
+            part2 = Math.min(part2, total + stepCounts[`${steps[steps.length-1].value}-0`])
+        }
+
+        return [part1, part2]
     }
 }
