@@ -15,7 +15,7 @@ def sonarSweep(input):
     part1 = increment_count(numbers)
 
     new_numbers = []
-    for i, number in enumerate(numbers[:-2]):
+    for i in range(0, len(numbers)-2):
         total = 0
         for number in numbers[i:i+3]:
             total += number
