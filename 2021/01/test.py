@@ -1,6 +1,10 @@
 from aoc import *
+import unittest
 
-part1 = sonarSweep("""199
+class TestStringMethods(unittest.TestCase):
+
+    def test(self):
+        (part1, part2) = sonarSweep("""199
 200
 208
 210
@@ -10,4 +14,7 @@ part1 = sonarSweep("""199
 269
 260
 263""".split())
-print(part1)
+        self.assertEqual(part1, 7)
+        self.assertEqual(part2, 5)
+
+unittest.main()
