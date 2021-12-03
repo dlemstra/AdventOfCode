@@ -17,5 +17,6 @@ class TestAoc(unittest.TestCase):
 00010
 01010""".splitlines())
         self.assertEqual(part1, 198)
+        self.assertEqual(part2, 230)
 
 unittest.main()
