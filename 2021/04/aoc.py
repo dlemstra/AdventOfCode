@@ -9,10 +9,23 @@ def playBingo(numbers, boards):
                     if len(values) == 0:
                         return (board, number)
 
-def giantSquid(input):
-    numbers = list(map(int, input[0].split(',')))
-    numbers.reverse()
+def findWorst(numbers, boards):
+    while len(boards) != 1:
+        (best_board, last_number) = playBingo(numbers, boards)
+        boards.remove(best_board)
+        numbers.append(last_number)
 
+    return playBingo(numbers, boards)
+
+def score(board, last_number):
+    remaining = []
+    for values in board:
+        for value in values:
+            if value not in remaining and value != last_number: remaining.append(value)
+
+    return last_number * sum(remaining)
+
+def createBoards(input):
     boards = []
 
     for i in range(1, len(input), 6):
@@ -32,12 +45,20 @@ def giantSquid(input):
         board.extend(rows)
         boards.append(board)
 
-    remaining = []
-    (best_board, last_number) = playBingo(numbers, boards)
-    for values in best_board:
-        for value in values:
-            if value not in remaining and value != last_number: remaining.append(value)
+    return boards
 
-    part1 = last_number * sum(remaining)
+def giantSquid(input):
+    numbers = list(map(int, input[0].split(',')))
+    numbers.reverse()
 
-    return (part1, None)
+    boards = createBoards(input)
+
+    (best_board, last_number) = playBingo(numbers.copy(), boards)
+    part1 = score(best_board, last_number)
+
+    boards = createBoards(input)
+
+    (worst_board, last_number) = findWorst(numbers, boards)
+    part2 = score(worst_board, last_number)
+
+    return (part1, part2)
