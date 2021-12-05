@@ -20,11 +20,32 @@ class Line:
             end = max(self.source.y, self.target.y)
             for y in range(start, end + 1):
                 yield Point(self.source.x, y)
-        if self.source.y == self.target.y:
+        elif self.source.y == self.target.y:
             start = min(self.source.x, self.target.x)
             end = max(self.source.x, self.target.x)
             for x in range(start, end + 1):
                 yield Point(x, self.source.y)
+        else:
+            x = self.source.x
+            y = self.source.y
+            incrementX = x < self.target.x
+            incrementY = y < self.target.y
+            while x != self.target.x:
+                yield Point(x, y)
+                if incrementX:
+                    x += 1
+                else:
+                    x -= 1
+                if incrementY:
+                    y += 1
+                else:
+                    y -= 1
+            yield Point(x, y)
+
+def updatePoints(points, point):
+    key = str(point)
+    value = points.get(key, 0)
+    points[key] = value + 1
 
 def hydrothermalVenture(input):
     part1 = 0
@@ -41,10 +62,15 @@ def hydrothermalVenture(input):
     points = {}
     for valid_line in valid_lines:
         for point in valid_line.coveredPoints():
-            key = str(point)
-            value = points.get(key, 0)
-            points[key] = value + 1
+            updatePoints(points, point)
 
     part1 = sum(1 for _ in filter(lambda key: points[key] > 1, points))
 
-    return (part1, None)
+    points = {}
+    for line in lines:
+        for point in line.coveredPoints():
+            updatePoints(points, point)
+
+    part2 = sum(1 for _ in filter(lambda key: points[key] > 1, points))
+
+    return (part1, part2)
