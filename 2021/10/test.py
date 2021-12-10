@@ -15,5 +15,6 @@ class TestAoc(unittest.TestCase):
 <{([([[(<>()){}]>(<<{{
 <{([{{}}[<[[[<>{}]]]>[]]""".splitlines())
         self.assertEqual(part1, 26397)
+        self.assertEqual(part2, 288957)
 
 unittest.main()
