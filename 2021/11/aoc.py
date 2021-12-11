@@ -20,6 +20,23 @@ def flashGrid(grid, width, height):
                         grid[y1][x1] += 1
     return flashes
 
+def executeStep(grid, width, height):
+    flashes = 0
+    incrementGrid(grid, width, height)
+    count = flashGrid(grid, width, height)
+    flashes += count
+    while count > 0:
+        count = flashGrid(grid, width, height)
+        flashes += count
+    return flashes
+
+def done(grid, width, height):
+    for y in range(0, height):
+        for x in range(0, width):
+            if grid[y][x] != 0:
+                return False
+    return True
+
 def dumboOctopus(input):
     grid = []
     for line in input:
@@ -28,12 +45,15 @@ def dumboOctopus(input):
     height = len(grid)
 
     part1 = 0
+    part2 = 0
     for _ in range(0, 100):
-        incrementGrid(grid, width, height)
-        count = flashGrid(grid, width, height)
-        part1 += count
-        while count > 0:
-            count = flashGrid(grid, width, height)
-            part1 += count
+        part1 += executeStep(grid, width, height)
 
-    return (part1, None)
+    count = 100
+    while part2 == 0:
+        executeStep(grid, width, height)
+        count += 1
+        if done(grid, width, height):
+            part2 = count
+
+    return (part1, part2)
