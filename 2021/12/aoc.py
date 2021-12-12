@@ -1,16 +1,30 @@
 class State:
-    def __init__(self, key, visited = []):
+    def __init__(self, key, visitedSmallTwice = False, visited = []):
         self.key = key
-        self.visited = visited
+        self.visited = visited.copy()
+        if not visitedSmallTwice and key.islower() and key in self.visited:
+            self.visitedSmallTwice = True
+        else:
+            self.visitedSmallTwice = visitedSmallTwice
         self.visited.append(key)
 
-    def clone(self, newKey):
-        return State(newKey, self.visited.copy())
+    def __str__(self):
+        return ','.join(self.visited)
 
-    def possibleExits(self, maze):
+    def clone(self, newKey):
+        return State(newKey, self.visitedSmallTwice, self.visited)
+
+    def possibleExitsPart1(self, maze):
         for exit in maze[self.key]:
             if exit == 'start': continue
             if exit.islower() and exit in self.visited: continue
+            yield exit
+
+    def possibleExitsPart2(self, maze):
+        for exit in maze[self.key]:
+            if exit == 'start': continue
+            if exit.islower() and exit in self.visited and self.visitedSmallTwice:
+                continue
             yield exit
 
 def readMaze(input):
@@ -36,10 +50,23 @@ def passagePathing(input):
 
     while len(stack) > 0:
         state = stack.pop()
-        for exit in state.possibleExits(maze):
+        for exit in state.possibleExitsPart1(maze):
             if exit == 'end':
                 part1 += 1
             else:
                 stack.append(state.clone(exit))
 
-    return (part1, None)
+    part2 = 0
+
+    stack = []
+    stack.append(State('start'))
+
+    while len(stack) > 0:
+        state = stack.pop()
+        for exit in state.possibleExitsPart2(maze):
+            if exit == 'end':
+                part2 += 1
+            else:
+                stack.append(state.clone(exit))
+
+    return (part1, part2)

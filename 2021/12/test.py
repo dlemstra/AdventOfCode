@@ -12,6 +12,7 @@ b-d
 A-end
 b-end""".splitlines())
         self.assertEqual(part1, 10)
+        self.assertEqual(part2, 36)
 
     def test2(self):
         (part1, part2) = passagePathing("""dc-end
@@ -25,6 +26,7 @@ kj-sa
 kj-HN
 kj-dc""".splitlines())
         self.assertEqual(part1, 19)
+        self.assertEqual(part2, 103)
 
     def test3(self):
         (part1, part2) = passagePathing("""fs-end
@@ -46,5 +48,6 @@ zg-he
 pj-fs
 start-RW""".splitlines())
         self.assertEqual(part1, 226)
+        self.assertEqual(part2, 3509)
 
 unittest.main()
