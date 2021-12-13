@@ -26,5 +26,12 @@ class TestAoc(unittest.TestCase):
 fold along y=7
 fold along x=5""".splitlines())
         self.assertEqual(part1, 17)
+        self.assertEqual(part2, """
+#####
+#   #
+#   #
+#   #
+#####
+""")
 
 unittest.main()

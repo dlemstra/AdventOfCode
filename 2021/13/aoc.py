@@ -45,9 +45,27 @@ def passagePathing(input):
         points.append(Point(int(x), int(y)))
 
     (part, position) = input[i + 1].split(' ')[2].split('=')
-    position = int(position)
+    points = fold(points, part, int(position))
 
-    points = fold(points, part, position)
     part1 = len(points)
 
-    return (part1, None)
+    for j in range(i + 2, len(input)):
+        (part, position) = input[j].split(' ')[2].split('=')
+        points = fold(points, part, int(position))
+
+    maxX = 0
+    maxY = 0
+    for point in points:
+        maxX = max(point.x, maxX)
+        maxY = max(point.y, maxY)
+
+    part2 = '\n'
+    for y in range(0, maxY + 1):
+        for x in range(0, maxX + 1):
+            if Point(x, y) in points:
+                part2 += '#'
+            else:
+                part2 += ' '
+        part2 += '\n'
+
+    return (part1, part2)
