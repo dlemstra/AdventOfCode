@@ -23,5 +23,6 @@ BC -> B
 CC -> N
 CN -> C""".splitlines())
         self.assertEqual(part1, 1588)
+        self.assertEqual(part2, 2188189693529)
 
 unittest.main()

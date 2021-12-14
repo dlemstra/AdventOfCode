@@ -1,27 +1,57 @@
+class Pair:
+    def __init__(self, key, replacement):
+        self.key = key
+        self.replacements = [key[0] + replacement[0], replacement[0] + key[1]]
+
+def executeSteps(counts, pairs, steps):
+    for _ in range(0, steps):
+        newCounts = counts.copy()
+        for pair in pairs:
+            if pair.key in counts:
+                count = counts[pair.key]
+                for replacement in pair.replacements:
+                    if not replacement in newCounts:
+                        newCounts[replacement] = 0
+                    newCounts[replacement] += count
+
+                newCounts[pair.key] -= count
+        counts = newCounts
+
+    return counts
+
+def getTotal(counts, value):
+    totals = {}
+    for key in counts:
+        count = counts[key]
+        if key[0] not in totals:
+            totals[key[0]] = 0
+        totals[key[0]] += count
+
+    totals[value[-1:]] += 1
+    mostCommon = totals[max(totals, key=totals.get)]
+    leastCommon = totals[min(totals, key=totals.get)]
+
+    return mostCommon - leastCommon
+
 def extendedPolymerization(input):
-    value = list(input[0])
     pairs = []
     for i in range(2, len(input)):
         pair = input[i].split(' -> ')
-        pairs.append(pair)
-
-    for i in range(0, 10):
-        j=0
-        while j < len(value) - 1:
-            for pair in pairs:
-                if value[j] == pair[0][0] and value[j + 1] == pair[0][1]:
-                    value.insert(j + 1, pair[1])
-                    j += 2
-                    break
+        pairs.append(Pair(pair[0], pair[1]))
 
     counts = {}
-    for c in value:
-        if not c in counts:
-            counts[c] = 0
-        counts[c] += 1
-    mostCommon = counts[max(counts, key=counts.get)]
-    leastCommon = counts[min(counts, key=counts.get)]
 
-    part1 = mostCommon - leastCommon
+    value = input[0]
+    for i in range(0, len(value) - 1):
+        key = value[i:i+2]
+        if key not in counts:
+            counts[key] = 0
+        counts[key] += 1
 
-    return (part1, None)
+    counts = executeSteps(counts, pairs, 10)
+    part1 = getTotal(counts, value)
+
+    counts = executeSteps(counts, pairs, 30)
+    part2 = getTotal(counts, value)
+
+    return (part1, part2)
