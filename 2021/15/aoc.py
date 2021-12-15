@@ -23,21 +23,21 @@ def readMaze(input):
 
     return maze
 
-def chiton(input):
-    part1 = 0
-
-    maze = readMaze(input)
+def getRisk(maze):
     height = len(maze)
     width = len(maze[0])
 
     risk = {}
-
+    risk["0x0"] = 0
     start = State(Point(0, 0), 0)
     stack = [start]
 
     while len(stack) > 0:
         state = stack.pop(0)
         point = state.point
+
+        if risk[str(point)] < state.score:
+            continue
 
         if point.x == width - 1 and point.y == height - 1:
             continue
@@ -49,6 +49,38 @@ def chiton(input):
                 risk[position] = score
                 stack.append(State(neighbour, score))
 
-    part1 = risk[f"{width - 1}x{height - 1}"]
+    return risk[f"{width - 1}x{height - 1}"]
 
-    return (part1, None)
+def extentMaze(maze):
+    height = len(maze)
+    width = len(maze[0])
+
+    for i in range(1, 5):
+        for y in range(0, height):
+            row = []
+            for x in range(0, width):
+                score = maze[y][x] + i
+                if score > 9:
+                    score -= 9
+                row.append(score)
+            maze.append(row)
+
+    height = len(maze)
+    for y in range(0, height):
+        for i in range(1, 5):
+            for x in range(0, width):
+                score = maze[y][x] + i
+                if score > 9:
+                    score -= 9
+                maze[y].append(score)
+
+    return maze
+
+def chiton(input):
+    maze = readMaze(input)
+    part1 = getRisk(maze)
+
+    maze = extentMaze(maze)
+    part2 = getRisk(maze)
+
+    return (part1, part2)
