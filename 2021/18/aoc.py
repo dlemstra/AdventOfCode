@@ -1,3 +1,5 @@
+from itertools import combinations
+
 def createList(line):
     data = ''
     stack = []
@@ -54,17 +56,12 @@ def explode(data, depth = 0):
     if not isinstance(data, list):
         return None
 
-    if depth >= 3:
+    if depth == 3:
         for i in range(0, len(data)):
             item = data[i]
             if isinstance(item, list):
                 left = item[0]
                 right = item[1]
-                if isinstance(left, list):
-                    return explode(left, depth + 1)
-                if isinstance(right, list):
-                    return explode(right, depth + 1)
-
                 if addLeft(data, i - 1, left):
                     left = 0
                 if addRight(data, i + 1, right):
@@ -73,6 +70,8 @@ def explode(data, depth = 0):
                 data[i] = 0
 
                 return (left, right)
+
+        return None
 
     for i in range(0, len(data)):
         result = explode(data[i], depth + 1)
@@ -127,7 +126,15 @@ def snailfish(input):
     for i in range(1, len(input)):
         right = createList(input[i])
         left = addition(left, right)
-
     part1 = magnitude(left)
 
-    return (part1, None)
+    part2 = 0
+    for (a, b) in combinations(input, 2):
+        left = createList(a)
+        right = createList(b)
+        part2 = max(part2, magnitude(addition(left, right)))
+        left = createList(b)
+        right = createList(a)
+        part2 = max(part2, magnitude(addition(left, right)))
+
+    return (part1, part2)
