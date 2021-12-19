@@ -117,5 +117,15 @@ def beaconScanner(input):
 
     part1 = len(beacons)
 
+    part2 = 0
+    for i in range(0, len(foundScanners)):
+        for j in range(0, len(foundScanners)):
+            if i == j: continue
+            pos1 = foundScanners[i].position
+            pos2 = foundScanners[j].position
+
+            distance = abs(pos1.x - pos2.x) + abs(pos1.y - pos2.y) + abs(pos1.z - pos2.z)
+            part2 = max(part2, distance)
+
     print('')
-    return (part1, None)
+    return (part1, part2)
