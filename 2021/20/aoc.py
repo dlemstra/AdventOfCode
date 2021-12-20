@@ -1,15 +1,18 @@
-def getNumber(pixels, x, y):
+def getNumber(pixels, x, y, border):
     value = 0
     for y1 in range(y - 1, y + 2):
         for x1 in range(x - 1, x + 2):
             value <<= 1
             key = f"{x1}x{y1}"
-            if key in pixels and pixels[key] == '#':
+            if key in pixels:
+                if pixels[key] == '#':
+                    value |= 1
+            elif border == '#':
                 value |= 1
 
     return value
 
-def extentImage(image, algorithm):
+def extentImage(image, algorithm, count):
     pixels = {}
 
     minX = 0
@@ -20,25 +23,29 @@ def extentImage(image, algorithm):
         for x in range(minX, maxX):
             pixels[f"{x}x{y}"] = image[y][x]
 
-    area = 3
-    for _ in range(2):
+    border='.'
+    for i in range(count):
         newPixels = {}
-        minX -= area
-        maxX += area
-        minY -= area
-        maxY += area
+        minX -= 1
+        maxX += 1
+        minY -= 1
+        maxY += 1
         for y in range(minY, maxY):
             for x in range(minX, maxX):
-                number = getNumber(pixels, x, y)
+                number = getNumber(pixels, x, y, border)
                 value = algorithm[number]
                 if value != 0:
                     newPixels[f"{x}x{y}"] = value
         pixels = newPixels
 
-    area += 1
+        if i % 2 == 0:
+            border=algorithm[0]
+        else:
+            border=algorithm[0x1ff]
+
     count = 0
-    for y in range(minY + area, maxY - area):
-        for x in range(minX + area, maxX - area):
+    for y in range(minY, maxY):
+        for x in range(minX, maxX):
             if pixels[f"{x}x{y}"] == '#': count += 1
 
     return count
@@ -50,6 +57,7 @@ def trenchMap(input):
     for j in range(2, len(input)):
         image.append(input[j])
 
-    part1 = extentImage(image, algorithm)
+    part1 = extentImage(image, algorithm, 2)
+    part2 = extentImage(image, algorithm, 50)
 
-    return (part1, None)
+    return (part1, part2)
