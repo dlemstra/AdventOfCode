@@ -31,13 +31,9 @@ def executeInstructions(instructions, registers, input):
                         registers[line[4]] *= getValue(registers, line[6:])
                     case 'o':
                         value = getValue(registers, line[6:])
-                        if value == 0:
-                            return None
                         registers[line[4]] %= value
             case 'd':
                 value = getValue(registers, line[6:])
-                if value == 0:
-                    return None
                 registers[line[4]] = int(registers[line[4]] / value)
             case 'e':
                 value1 = registers[line[4]]
@@ -64,9 +60,7 @@ def createRegister(state):
 
     return register
 
-def arithmeticLogicUnit(input):
-    blocks = list(parseInput(input))
-
+def executeBlocks(blocks, delegate):
     states = {}
     states[State(0,0,0)] = 0
 
@@ -83,13 +77,18 @@ def arithmeticLogicUnit(input):
                     if newState not in newStates:
                         newStates[newState] = value
                     else:
-                        newStates[newState] = max(value, newStates[newState])
+                        newStates[newState] = delegate(value, newStates[newState])
 
         states = newStates
 
-    part1 = 0
     for state in states:
         if state.z == 0:
-            part1 = max(states[state], part1)
+            return states[state]
 
-    return (part1, None)
+def arithmeticLogicUnit(input):
+    blocks = list(parseInput(input))
+
+    part1 = executeBlocks(blocks, max)
+    part2 = executeBlocks(blocks, min)
+
+    return (part1, part2)
