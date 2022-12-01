@@ -3,9 +3,9 @@ ARG VARIANT=2
 FROM dart:${VARIANT}
 
 # [Option] Install zsh
-ARG INSTALL_ZSH="${templateOption:installZsh}"
+ARG INSTALL_ZSH="false"
 # [Option] Upgrade OS packages to their latest versions
-ARG UPGRADE_PACKAGES="${templateOption:upgradePackages}"
+ARG UPGRADE_PACKAGES="false"
 
 # Install needed packages and setup non-root user. Use a separate RUN statement to add your own dependencies.
 ARG USERNAME=vscode
