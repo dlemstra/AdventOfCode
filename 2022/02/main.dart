@@ -22,7 +22,7 @@ List<Play> getGuide(List<String> lines) {
 
 int part1(List<Play> guide) {
   var score = 0;
-  for (var play in guide) {
+  for (final play in guide) {
     switch(play.mine) {
       case "X": {
         score += 1;
@@ -56,10 +56,71 @@ int part1(List<Play> guide) {
   return score;
 }
 
+int part2(List<Play> guide) {
+  var score = 0;
+  for (final play in guide) {
+    switch(play.theirs) {
+      case "A": {
+        switch(play.mine) {
+          case "X": {
+              score += 3;
+          }
+          break;
+          case "Y": {
+              score += 1 + 3;
+          }
+          break;
+          case "Z": {
+              score += 2 + 6;
+          }
+          break;
+        }
+      }
+      break;
+      case "B": {
+        switch(play.mine) {
+          case "X": {
+              score += 1;
+          }
+          break;
+          case "Y": {
+              score += 2 + 3;
+          }
+          break;
+          case "Z": {
+              score += 3 + 6;
+          }
+          break;
+        }
+      }
+      break;
+      case "C": {
+        switch(play.mine) {
+          case "X": {
+              score += 2;
+          }
+          break;
+          case "Y": {
+              score += 3 + 3;
+          }
+          break;
+          case "Z": {
+              score += 1 + 6;
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+  return score;
+}
+
 void main() {
   final input = new File("input");
   final lines = input.readAsLinesSync();
 
   final guide = getGuide(lines);
   print(part1(guide));
+  print(part2(guide));
 }
