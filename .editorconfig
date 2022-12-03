@@ -10,3 +10,6 @@ tab_width = 4
 
 [input]
 insert_final_newline = false
+
+[testinput]
+insert_final_newline = false
