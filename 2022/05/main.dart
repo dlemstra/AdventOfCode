@@ -21,8 +21,9 @@ List<List<String>> createStacks(List<String> lines) {
   return stacks;
 }
 
-String part1(List<String> lines) {
-  final stacks = createStacks(lines);
+void solve(List<String> lines) {
+  final stacks1 = createStacks(lines);
+  final stacks2 = createStacks(lines);
 
   var start = 0;
   while (lines[start++] != '') { }
@@ -33,22 +34,30 @@ String part1(List<String> lines) {
     final source = int.parse(info[3]) - 1;
     final target = int.parse(info[5]) - 1;
     for (var j=0; j < count; j++) {
-      final value = stacks[source].removeLast();
-      stacks[target].add(value);
+      final value = stacks1[source].removeLast();
+      stacks1[target].add(value);
     }
+    final items = <String>[];
+    for (var j=0; j < count; j++) {
+      items.add(stacks2[source].removeLast());
+    }
+    stacks2[target].addAll(items.reversed);
   }
 
-  var result = "";
-  for (var i=0; i < stacks.length; i++) {
-    result += stacks[i].removeLast();
+  var part1 = "";
+  var part2 = "";
+  for (var i=0; i < stacks1.length; i++) {
+    part1 += stacks1[i].removeLast();
+    part2 += stacks2[i].removeLast();
   }
 
-  return result;
+  print(part1);
+  print(part2);
 }
 
 void main() {
   final input = new File("input");
   final lines = input.readAsLinesSync();
 
-  print(part1(lines));
+  solve(lines);
 }
