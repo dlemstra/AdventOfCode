@@ -1,11 +1,11 @@
 import 'dart:io';
 
-void part1(List<String> lines) {
+void solve(List<String> lines, int count) {
   for (final line in lines) {
     final chars = line.runes.toList();
-    for (var i=0; i < line.length - 4; i++) {
-      if (chars.sublist(i, i + 4).toSet().toList().length == 4) {
-        print(i + 4);
+    for (var i=0; i < line.length - count; i++) {
+      if (chars.sublist(i, i + count).toSet().toList().length == count) {
+        print(i + count);
         break;
       }
     }
@@ -16,5 +16,6 @@ void main() {
   final input = new File("input");
   final lines = input.readAsLinesSync();
 
-  part1(lines);
+  solve(lines, 4);
+  solve(lines, 14);
 }
