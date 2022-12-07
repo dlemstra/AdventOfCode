@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 void part1(List<String> lines) {
   final totals = new Map();
@@ -24,8 +25,18 @@ void part1(List<String> lines) {
     }
   }
 
-  final result = totals.values.fold(0, (prev, element) => prev + (element <= 100000 ? element as int : 0));
-  print(result);
+  final part1 = totals.values.fold(0, (prev, element) => prev + (element <= 100000 ? element as int : 0));
+  print(part1);
+
+  final used = totals["/"];
+  final unused = 70000000 - used;
+  var part2 = used;
+  for (final value in totals.values) {
+    if (unused + value >= 30000000) {
+      part2 = min<int>(part2, value);
+    }
+  }
+  print(part2);
 }
 
 void main() {
