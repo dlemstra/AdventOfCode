@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-void part1(List<String> lines) {
+void solve(List<String> lines) {
   final totals = new Map();
   final path = <String>[];
 
@@ -43,5 +43,5 @@ void main() {
   final input = new File("input");
   final lines = input.readAsLinesSync();
 
-  part1(lines);
+  solve(lines);
 }
