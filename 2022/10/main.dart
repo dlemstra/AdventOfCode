@@ -4,6 +4,8 @@ void solve(List<String> lines) {
   final cycles = [20, 60, 100, 140, 180, 220];
   var cycle = 0;
   var x = 1;
+  var crt = [];
+  var pos = 0;
 
   var part1 = 0;
   for (final line in lines) {
@@ -15,11 +17,18 @@ void solve(List<String> lines) {
       if (cycles.contains(cycle)) {
         part1 += cycle * x;
       }
+      crt.add((x - pos++).abs() <= 1 ? '#' : ' ');
+      if (crt.length == 40) {
+        print(crt.join());
+        crt = [];
+        pos = 0;
+      }
     }
     x += addition;
   }
 
-  print(part1);
+  print("");
+  print("part1: ${part1}");
 }
 
 void main() {
