@@ -17,16 +17,14 @@ class Step {
     }
 }
 
-List loadMaze(List<String> lines) {
+Map loadMaze(List<String> lines) {
     final maze = new Map();
-    var start;
     var y = 0;
     for (final line in lines) {
         var x = 0;
         for (var rune in line.runes) {
             if (rune == "S".runes.first) {
                 rune = 666;
-                start = new Step(x, y);
             }
 
             maze["${x}x${y}"] = rune;
@@ -35,7 +33,23 @@ List loadMaze(List<String> lines) {
         y++;
     }
 
-    return [maze, start];
+    return maze;
+}
+
+List<Step> findStartPositions(Map maze, String allowedChars) {
+    final positions = <Step>[];
+
+    for (final position in maze.keys) {
+        for (var rune in allowedChars.runes) {
+            rune = rune == "S".runes.first ? 666 : rune;
+            if (maze[position] == rune) {
+                final info = position.split("x");
+                positions.add(new Step(int.parse(info[0]), int.parse(info[1])));
+            }
+        }
+    }
+
+    return positions;
 }
 
 Step? getNextStep(Map maze, Step current, int xIncrement, int yIncrement) {
@@ -60,24 +74,20 @@ Step? getNextStep(Map maze, Step current, int xIncrement, int yIncrement) {
     return nextStep;
 }
 
-void solve(List<String> lines) {
-    final info = loadMaze(lines);
-    final maze = info[0];
-
-    final steps = <Step>[];
-    steps.add(info[1]);
+void solve(Map maze, String allowedChars) {
+    final steps = findStartPositions(maze, allowedChars);
 
     final bestMoves = new Map();
 
-    var part1 = 100000000000;
+    var minSteps = 100000000000;
 
     while (steps.length > 0) {
         final step = steps.removeLast();
         final position = "${step.x}x${step.y}";
 
         if (maze[position] == "E".runes.first) {
-            if (step.count < part1) {
-                part1 = step.count;
+            if (step.count < minSteps) {
+                minSteps = step.count;
             }
             continue;
         }
@@ -109,12 +119,15 @@ void solve(List<String> lines) {
         }
     }
 
-    print(part1);
+    print(minSteps);
 }
 
 void main() {
     final input = new File("input");
     final lines = input.readAsLinesSync();
 
-    solve(lines);
+    final maze = loadMaze(lines);
+
+    solve(maze, "S");
+    solve(maze, "Sa");
 }
