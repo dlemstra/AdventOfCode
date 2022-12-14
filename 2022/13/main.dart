@@ -48,11 +48,13 @@ bool? isCorrectOrder(dynamic valueA, dynamic valueB) {
     } else if (valueA is List && valueB is int) {
         return isCorrectOrder(valueA, [valueB]);
     } else if (valueA is List && valueB is List) {
-        while (valueA.length > 0 && valueB.length > 0) {
-            final correctOrder = isCorrectOrder(valueA.removeAt(0), valueB.removeAt(0));
+        var i = 0;
+        while (i < valueA.length && i < valueB.length) {
+            final correctOrder = isCorrectOrder(valueA[i], valueB[i]);
             if (correctOrder != null) {
                 return correctOrder;
             }
+            i++;
         }
         return isCorrectOrder(valueA.length, valueB.length);
     } else if (valueA == valueB) {
@@ -62,11 +64,19 @@ bool? isCorrectOrder(dynamic valueA, dynamic valueB) {
     return valueA < valueB;
 }
 
-void solve(List<String> lines) {
+int compareOrder(List a, List b) {
+    final result = isCorrectOrder(new List.from(a), new List.from(b));
+    return result == null ? 0 : result == true ? -1 : 1;
+}
+
+List part1(List<String> lines) {
+    var packets = [];
+
     var part1 = 0;
     for (var i = 0; i < lines.length; i += 3) {
         final listA = createList(lines[i].substring(1, lines[i].length - 1));
         final listB = createList(lines[i + 1].substring(1, lines[i + 1].length - 1));
+        packets.addAll([listA, listB]);
 
         if (isCorrectOrder(listA, listB) == true) {
             part1 += (i + 3) ~/ 3;
@@ -74,11 +84,28 @@ void solve(List<String> lines) {
     }
 
     print(part1);
+
+    return packets;
+}
+
+void part2(List packets) {
+    packets.addAll([[[2]], [[6]]]);
+    packets.sort((a, b) => compareOrder(a, b));
+
+    var part2 = 1;
+    for (var i = 0; i < packets.length; i++) {
+        if (packets[i].length == 1 && packets[i][0] is List && packets[i][0].length == 1 && [2, 6].contains(packets[i][0][0])) {
+            part2 *= i + 1;
+        }
+    }
+
+    print(part2);
 }
 
 void main() {
     final input = new File("input");
     final lines = input.readAsLinesSync();
 
-    solve(lines);
+    final packets = part1(lines);
+    part2(packets);
 }
