@@ -18,6 +18,33 @@ class Position {
         => "${this.x}x${this.y}";
 }
 
+int getTuningFrequency(Map sensors, int max) {
+    final sortedSensors = sensors.entries.toList();
+    sortedSensors.sort((a, b) => b.value.compareTo(a.value));
+    final sensorKeys = sortedSensors.map((e) => e.key).toList();
+
+    for (var y = 0; y < max; y++) {
+        for (var x = 0; x < max; x++) {
+            var found = false;
+            for (final sensor in sensorKeys) {
+                final distance = sensor.distance(new Position(x, y));
+                final beaconDistance = sensors[sensor];
+                if (distance <= beaconDistance) {
+                    found = true;
+                    x += (beaconDistance - distance) as int;
+                    break;
+                }
+            }
+
+            if (found == false) {
+                return (x * 4000000) + y;
+            }
+        }
+    }
+
+    return 0;
+}
+
 void solve(List<String> lines, int y) {
     final sensors = new Map();
     final beaconsOnLine = new Set<String>();
@@ -44,7 +71,7 @@ void solve(List<String> lines, int y) {
     maxX += maxX;
     var postion = Position(minX, y);
     while (postion.x <  maxX) {
-        for (Position sensor in sensors.keys) {
+        for (final sensor in sensors.keys) {
             final distance = sensor.distance(postion);
             if (distance <= sensors[sensor]) {
                 count++;
@@ -55,6 +82,7 @@ void solve(List<String> lines, int y) {
     }
 
     print(count);
+    print(getTuningFrequency(sensors, y * 2));
 }
 
 void main() {
