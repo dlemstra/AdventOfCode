@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 class Rock {
     List<String> rows = [];
@@ -9,18 +10,6 @@ class Rock {
 
     int get height
         => rows.length;
-}
-
-void drawMap(List<String> cave) {
-    for (final row in cave.reversed) {
-        print("|" + row + "|");
-    }
-}
-
-void addRows(List<String> cave) {
-    for (var i = 0; i < 3; i ++) {
-        cave.add(".......");
-    }
 }
 
 List<Rock> createRocks() {
@@ -104,17 +93,23 @@ List<String> moveRockDown(List<String> rows) {
     return newRows;
 }
 
-void solve(String jetPattern) {
+void solve(String jetPattern, int maxRocks) {
     final cave = <String>[];
     cave.add("-------");
 
     final rocks = createRocks();
 
+    var count = 0;
     var jetIndex = 0;
     var rockIndex = 0;
 
-    while (rockIndex < 2022) {
-        addRows(cave);
+    final visited = new Map();
+
+    while (rockIndex < maxRocks) {
+        for (var i = 0; i < 3; i ++) {
+            cave.add(".......");
+        }
+
         final rock = rocks[rockIndex % rocks.length];
         for (final row in rock.rows) {
             cave.add(row);
@@ -124,7 +119,7 @@ void solve(String jetPattern) {
         var done = false;
         while (!done) {
             var startIndex = rowIndex - rock.height;
-            var newRows = moveRockLeftRight(cave.sublist(startIndex, startIndex + rock.height), jetPattern[jetIndex % jetPattern.length] == ">");
+            var newRows = moveRockLeftRight(cave.sublist(startIndex, startIndex + rock.height), jetPattern[jetIndex] == ">");
             for (final newRow in newRows) { cave.removeAt(--rowIndex); }
             for (final newRow in newRows) { cave.insert(rowIndex++, newRow); }
 
@@ -141,17 +136,35 @@ void solve(String jetPattern) {
             for (final newRow in newRows) { cave.removeAt(--rowIndex); }
             for (final newRow in newRows) { cave.insert(rowIndex++, newRow); }
 
-            jetIndex++;
+            jetIndex = (jetIndex + 1) % jetPattern.length;
             rowIndex--;
 
             while (cave.last == ".......") {
                 cave.removeLast();
             }
         }
+
+        final key = "${rockIndex % rocks.length}-${jetIndex}-${cave.sublist(cave.length - min(cave.length, 20))}";
+        final visitedInfo = visited[key];
+        if (visitedInfo != null) {
+            final visitedIndex = visitedInfo[0] as int;
+            final visitedLength = visitedInfo[1] as int;
+            final indexIncrement = rockIndex - visitedIndex;
+            final countIncrement = cave.length - visitedLength;
+
+            final steps = (maxRocks - rockIndex) ~/ indexIncrement;
+            rockIndex += steps * indexIncrement;
+            count += steps * countIncrement;
+
+            visited.clear();
+        } else {
+            visited[key] = [rockIndex, cave.length];
+        }
+
         rockIndex++;
     }
 
-    print (cave.length - 1);
+    print(count + cave.length - 1);
 }
 
 
@@ -159,5 +172,6 @@ void main() {
     final input = new File("input");
     final lines = input.readAsLinesSync();
 
-    solve(lines[0]);
+    solve(lines[0], 2022);
+    solve(lines[0], 1000000000000);
 }
