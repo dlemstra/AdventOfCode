@@ -17,21 +17,44 @@ class State {
     num pressure = 0;
     num nextPressure = 0;
     num totalPressure = 0;
-    String valveName = "AA";
+    String position = "AA";
+    String elephantPosition = "";
     List<String> openValves = [];
 
     State() {}
 
-    State.next(State other, String valveName) {
+    State.positionNext(State other, String position) {
         this.minute = other.minute + 1;
         this.pressure = other.pressure;
+        this.nextPressure = other.nextPressure;
         this.totalPressure = other.totalPressure;
-        this.valveName = valveName;
+        this.position = position;
+        this.elephantPosition = other.elephantPosition;
+        this.openValves = new List<String>.from(other.openValves);
+    }
+
+    State.elephantNext(State other, String elephantPosition) {
+        this.minute = other.minute + 1;
+        this.pressure = other.pressure;
+        this.nextPressure = other.nextPressure;
+        this.totalPressure = other.totalPressure;
+        this.position = other.position;
+        this.elephantPosition = elephantPosition;
+        this.openValves = new List<String>.from(other.openValves);
+    }
+
+    State.next(State other, String position, String elephantPosition) {
+        this.minute = other.minute + 1;
+        this.pressure = other.pressure;
+        this.nextPressure = other.nextPressure;
+        this.totalPressure = other.totalPressure;
+        this.position = position;
+        this.elephantPosition = elephantPosition;
         this.openValves = new List<String>.from(other.openValves);
     }
 
     String get key
-        => "${this.valveName}-${this.pressure}-${this.minute}";
+        => "${this.position}-${this.elephantPosition}-${this.minute}";
 
     void incrementPressure() {
         if (this.nextPressure == 0) {
@@ -48,7 +71,18 @@ class State {
         => "${this.key} => ${this.pressure} ${this.totalPressure}";
 }
 
-void solve(List<String> lines) {
+State? openValve(State state, Valve valve) {
+    if (valve.rate > 0 && !state.openValves.contains(valve.name)) {
+        final nextState = new State.next(state, state.position, state.elephantPosition);
+        nextState.nextPressure += valve.rate;
+        nextState.openValves.add(valve.name);
+        return nextState;
+    }
+
+    return null;
+}
+
+void solve(List<String> lines, bool withElephants) {
     final valves = new Map();
     for (final line in lines) {
         final info = line.split(" ");
@@ -60,19 +94,20 @@ void solve(List<String> lines) {
     }
 
     final states = <State>[];
-    states.add(new State());
+    final firstState = new State();
+    if (withElephants) {
+        firstState.elephantPosition = "AA";
+    }
+
+    states.add(firstState);
 
     final visited = new Map();
 
-    num part1 = 0;
-    while(states.length > 0) {
+    num maxMinutes = withElephants ? 27 : 31;
+    num bestPressure = 0;
+    while (states.length > 0) {
         final state = states.removeLast();
         state.incrementPressure();
-
-        if (state.minute == 31) {
-            part1 = max(part1, state.totalPressure);
-            continue;
-        }
 
         if (visited.containsKey(state.key) && state.totalPressure <= visited[state.key]) {
             continue;
@@ -80,31 +115,68 @@ void solve(List<String> lines) {
 
         visited[state.key] = state.totalPressure;
 
-        if (state.openValves.length == valves.length) {
-            states.add(new State.next(state, state.valveName));
+        if (state.minute == maxMinutes) {
+            final old = bestPressure;
+            bestPressure = max(bestPressure, state.totalPressure);
             continue;
         }
 
-        final valve = valves[state.valveName];
+        final valve = valves[state.position];
 
-        if (valve.rate > 0 && !state.openValves.contains(valve.name)) {
-            final nextState = new State.next(state, valve.name);
-            nextState.nextPressure = valve.rate;
-            nextState.openValves.add(valve.name);
-            states.add(nextState);
+        if (state.openValves.length == valves.length) {
+            states.add(new State.next(state, state.position, state.elephantPosition));
+            continue;
         }
 
-        for (final exit in valve.exits) {
-            states.add(new State.next(state, exit));
+        if (withElephants) {
+            final elephant = valves[state.elephantPosition];
+
+            var nextState = openValve(state, valve);
+            if (nextState != null) {
+                nextState.minute--;
+                final nextState2 = openValve(nextState, elephant);
+                if (nextState2 != null) {
+                    states.add(nextState2);
+                }
+                for (final exit in elephant.exits) {
+                    states.add(new State.elephantNext(nextState, exit));
+                }
+            }
+
+            nextState = openValve(state, elephant);
+            if (nextState != null) {
+                nextState.minute--;
+                for (final exit in valve.exits) {
+                    states.add(new State.positionNext(nextState, exit));
+                }
+            }
+
+            for (final exit1 in valve.exits) {
+                for (final exit2 in elephant.exits) {
+                    if (exit1 != exit2) {
+                        states.add(new State.next(state, exit1, exit2));
+                    }
+                }
+            }
+        } else {
+            final nextState = openValve(state, valve);
+            if (nextState != null) {
+                states.add(nextState);
+            }
+
+            for (final exit in valve.exits) {
+                states.add(new State.positionNext(state, exit));
+            }
         }
     }
 
-    print(part1);
+    print(bestPressure);
 }
 
 void main() {
     final input = new File("input");
     final lines = input.readAsLinesSync();
 
-    solve(lines);
+    solve(lines, false);
+    solve(lines, true);
 }
