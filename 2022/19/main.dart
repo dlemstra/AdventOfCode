@@ -45,7 +45,7 @@ class MineralState {
         this.geodeTotal = other.geodeTotal;
     }
 
-    List<MineralState> getNextStates(Blueprint blueprint) {
+    List<MineralState> getNextStates(Blueprint blueprint, int maxMinutes) {
         final result = <MineralState>[];
         MineralState next;
         int oresNeeded;
@@ -57,7 +57,7 @@ class MineralState {
             var obsidianNeeded = max(0, blueprint.geodeObsidianCosts - next.obsidianTotal);
             incrementCount = oresNeeded == 0 && obsidianNeeded == 0 ? 1 : max(1, max((oresNeeded / next.oreCount).ceil() + 1, (obsidianNeeded / next.obsidianCount).ceil() + 1));
             while (incrementCount-- != 0) { next.increment(); }
-            if (next.minute <= 24) {
+            if (next.minute <= maxMinutes) {
                 next.oreTotal -= blueprint.geodeOreCosts;
                 next.obsidianTotal -= blueprint.geodeObsidianCosts;
                 next.geodeCount++;
@@ -66,48 +66,59 @@ class MineralState {
         }
 
         if (this.clayCount > 0) {
+            if (this.obsidianTotal <= blueprint.geodeObsidianCosts) {
+                next = MineralState.from(this);
+                oresNeeded = max(0, blueprint.obsidianOreCosts - next.oreTotal);
+                var clayNeeded = max(0, blueprint.obsidianClayCosts - next.clayTotal);
+                incrementCount = oresNeeded == 0 && clayNeeded == 0 ? 1 : max(1, max((oresNeeded / next.oreCount).ceil() + 1, (clayNeeded / next.clayCount).ceil() + 1));
+                while (incrementCount-- != 0) { next.increment(); }
+                if (next.minute <= maxMinutes) {
+                    next.oreTotal -= blueprint.obsidianOreCosts;
+                    next.clayTotal -= blueprint.obsidianClayCosts;
+                    next.obsidianCount++;
+                    result.add(next);
+                }
+            }
+        }
+
+        final maxClay = max(blueprint.obsidianClayCosts, blueprint.geodeObsidianCosts);
+        if (this.oreTotal <= maxClay) {
             next = MineralState.from(this);
-            oresNeeded = max(0, blueprint.obsidianOreCosts - next.oreTotal);
-            var clayNeeded = max(0, blueprint.obsidianClayCosts - next.clayTotal);
-            incrementCount = oresNeeded == 0 && clayNeeded == 0 ? 1 : max(1, max((oresNeeded / next.oreCount).ceil() + 1, (clayNeeded / next.clayCount).ceil() + 1));
+            oresNeeded = max(0, blueprint.clayOreCosts - next.oreTotal);
+            incrementCount = oresNeeded == 0 ? 1 : (oresNeeded / next.oreCount).ceil() + 1;
             while (incrementCount-- != 0) { next.increment(); }
-            if (next.minute <= 24) {
-                next.oreTotal -= blueprint.obsidianOreCosts;
-                next.clayTotal -= blueprint.obsidianClayCosts;
-                next.obsidianCount++;
+            if (next.minute <= maxMinutes) {
+                next.oreTotal -= blueprint.clayOreCosts;
+                next.clayCount++;
                 result.add(next);
             }
         }
 
-        next = MineralState.from(this);
-        oresNeeded = max(0, blueprint.clayOreCosts - next.oreTotal);
-        incrementCount = oresNeeded == 0 ? 1 : (oresNeeded / next.oreCount).ceil() + 1;
-        while (incrementCount-- != 0) { next.increment(); }
-        if (next.minute <= 24) {
-            next.oreTotal -= blueprint.clayOreCosts;
-            next.clayCount++;
-            result.add(next);
-        }
-
-        next = MineralState.from(this);
-        oresNeeded = max(0, blueprint.oreOreCosts - next.oreTotal);
-        incrementCount = oresNeeded == 0 ? 1 : (oresNeeded / next.oreCount).ceil() + 1;
-        while (incrementCount-- != 0) { next.increment(); }
-        if (next.minute <= 24) {
-            next.oreTotal -= blueprint.oreOreCosts;
-            next.oreCount++;
-            result.add(next);
+        var maxOres = max(blueprint.clayOreCosts, max(blueprint.obsidianOreCosts, blueprint.geodeOreCosts));
+        if (this.oreTotal <= maxOres) {
+            next = MineralState.from(this);
+            oresNeeded = max(0, blueprint.oreOreCosts - next.oreTotal);
+            incrementCount = oresNeeded == 0 ? 1 : (oresNeeded / next.oreCount).ceil() + 1;
+            while (incrementCount-- != 0) { next.increment(); }
+            if (next.minute <= maxMinutes) {
+                next.oreTotal -= blueprint.oreOreCosts;
+                next.oreCount++;
+                result.add(next);
+            }
         }
 
         return result;
     }
+
+    String get key
+        => "${this.oreCount}-${this.oreTotal}-${this.clayCount}-${this.clayTotal}-${this.obsidianCount}-${this.obsidianTotal}-${this.geodeCount}-${this.geodeTotal}";
 
     @override
     String toString()
         => "${this.minute} => ${this.oreCount}: ${this.oreTotal}|${this.clayCount}: ${this.clayTotal}|${this.obsidianCount}: ${this.obsidianTotal}|${this.geodeCount}: ${this.geodeTotal}";
 }
 
-void solve(List<String> lines) {
+List<Blueprint> loadBlueprints(List<String> lines) {
     final blueprints = <Blueprint>[];
     for (final line in lines) {
         final info = line.split(" ");
@@ -120,33 +131,53 @@ void solve(List<String> lines) {
         blueprints.add(new Blueprint(oreOreCosts, clayOreCosts, obsidianOreCosts, obsidianClayCosts, geodeOreCosts, geodeObsidianCosts));
     }
 
-    var part1 = 0;
-    for (var i = 0; i < blueprints.length; i++) {
-        final blueprint = blueprints[i];
-        final stack = <MineralState>[];
-        stack.addAll(new MineralState().getNextStates(blueprint));
-        var maxGeodeTotal = 0;
-        while (stack.length != 0) {
-            final state = stack.removeLast();
+    return blueprints;
+}
 
-            if (state.minute >= 24) {
-                state.increment();
-                maxGeodeTotal = max(maxGeodeTotal, state.geodeTotal);
-                continue;
-            }
+int solve(Blueprint blueprint, int maxMinutes) {
+    var maxGeodeTotal = 0;
+    final visited = new Set<String>();
+    final stack = <MineralState>[];
+    stack.addAll(new MineralState().getNextStates(blueprint, maxMinutes));
+    while (stack.length != 0) {
+        final state = stack.removeLast();
 
-            stack.addAll(state.getNextStates(blueprint));
+        if (state.minute >= maxMinutes) {
+            state.increment();
+            maxGeodeTotal = max(maxGeodeTotal, state.geodeTotal);
+            continue;
         }
-        part1 += (i + 1) * maxGeodeTotal;
+
+        if (visited.add(state.key)) {
+            stack.addAll(state.getNextStates(blueprint, maxMinutes));
+        }
     }
 
+    return maxGeodeTotal;
+}
+
+void part1(List<Blueprint> blueprints) {
+    var part1 = 0;
+    for (var i = 0; i < blueprints.length; i++) {
+        part1 += (i + 1) * solve(blueprints[i], 24);
+    }
     print(part1);
 }
 
+void part2(List<Blueprint> blueprints) {
+    var part2 = 1;
+    for (var i = 0; i < 3; i++) {
+        part2 *= solve(blueprints[i], 32);
+    }
+    print(part2);
+}
 
 void main() {
     final input = new File("input");
     final lines = input.readAsLinesSync();
 
-    solve(lines);
+    final blueprints = loadBlueprints(lines);
+
+    part1(blueprints);
+    part2(blueprints);
 }
