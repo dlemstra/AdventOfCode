@@ -32,7 +32,7 @@ class Elve {
 
     Elve(this.position);
 
-    void setNextPostion(List<Position> elves, Direction direction) {
+    void setNextPostion(Set<Position> elves, Direction direction) {
         if (!_canMove(elves)) return;
 
         var nextDirection = direction;
@@ -43,15 +43,17 @@ class Elve {
         }
     }
 
-    void move() {
+    bool move() {
+        final moved = nextPosition != null;
         if (nextPosition != null) position = nextPosition!;
         reset();
+        return moved;
     }
 
     void reset()
         => nextPosition = null;
 
-    bool _canMove(List<Position> elves) {
+    bool _canMove(Set<Position> elves) {
         return
             elves.contains(new Position(position.x - 1, position.y - 1)) ||
             elves.contains(new Position(position.x, position.y - 1)) ||
@@ -63,7 +65,7 @@ class Elve {
             elves.contains(new Position(position.x + 1, position.y + 1));
     }
 
-    Position? _getNextPostion(List<Position> elves, Direction direction) {
+    Position? _getNextPostion(Set<Position> elves, Direction direction) {
         switch (direction) {
             case Direction.north:
                 final nextPosition = new Position(position.x, position.y - 1);
@@ -103,7 +105,7 @@ class Elve {
     }
 }
 
-int emptyTileCount(List<Position> elves) {
+int emptyTileCount(Set<Position> elves) {
     final minY = elves.map((elve) => elve.y).reduce(min);
     final minX = elves.map((elve) => elve.x).reduce(min);
     final maxY = elves.map((elve) => elve.y).reduce(max) + 1;
@@ -134,9 +136,9 @@ solve(List<String> lines) {
     }
 
     Direction direction = Direction.north;
-    var positions = elves.map((elve) => elve.position).toList();
+    var positions = elves.map((elve) => elve.position).toSet();
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 10000; i++) {
         for (var elve in elves) {
             elve.setNextPostion(positions, direction);
         }
@@ -144,16 +146,22 @@ solve(List<String> lines) {
         final seen = Set<Position>();
         final duplicates = elves.map((elve) => elve.nextPosition ?? elve.position).where((elve) => !seen.add(elve)).toList();
 
+        var moved = 0;
         for (var elve in elves) {
             if (duplicates.contains(elve.nextPosition)) elve.reset();
-            else elve.move();
+            if (elve.move()) moved++;
         }
 
-        positions = elves.map((elve) => elve.position).toList();
+        positions = elves.map((elve) => elve.position).toSet();
         direction = Direction.values[(direction.index + 1) % 4];
-    }
 
-    print(emptyTileCount(positions));
+        if (i == 10) print("\r${emptyTileCount(positions)}");
+        stdout.write("\r${i}");
+        if (moved == 0) {
+            print("\r${i + 1}");
+            break;
+        }
+    }
 }
 
 void main() {
