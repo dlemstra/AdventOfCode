@@ -48,48 +48,53 @@ class State {
     List<State> nextStates(Map<int, Set<Position>> blizzardPositions, int maxX, int maxY) {
         final states = <State>[];
 
-        final blizzards = blizzardPositions[minute]!;
-        var newPosition = new Position(position.x - 1, position.y);
-        if (_validPosition(newPosition, blizzards, maxX, maxY)) states.add(new State(newPosition, minute + 1));
-        newPosition = new Position(position.x + 1, position.y);
-        if (_validPosition(newPosition, blizzards, maxX, maxY)) states.add(new State(newPosition, minute + 1));
-        newPosition = new Position(position.x, position.y - 1);
-        if (_validPosition(newPosition, blizzards, maxX, maxY)) states.add(new State(newPosition, minute + 1));
-        newPosition = new Position(position.x, position.y + 1);
-        if (_validPosition(newPosition, blizzards, maxX, maxY)) states.add(new State(newPosition, minute + 1));
-        newPosition = new Position(position.x, position.y);
-        if (newPosition.x == 1 && newPosition.y == 0) states.add(new State(newPosition, minute + 1));
-        else if (_validPosition(newPosition, blizzards, maxX, maxY)) states.add(new State(newPosition, minute + 1));
-
-        for (final state in states) {
-            state.history.addAll(history);
-            state.history.add(this);
+        final blizzards = blizzardPositions[(minute + 1) % blizzardPositions.length]!;
+        for (final newPosition in [new Position(position.x - 1, position.y),
+                                   new Position(position.x + 1, position.y),
+                                   new Position(position.x, position.y - 1),
+                                   new Position(position.x, position.y + 1),
+                                   new Position(position.x, position.y)]) {
+            if (_validPosition(newPosition, blizzards, maxX, maxY))
+                states.add(new State(newPosition, minute + 1));
         }
 
         return states;
     }
 
     bool _validPosition(Position position, Set<Position> blizzards, int maxX, int maxY)
-        => position.x >= 1 && position.x <= maxX &&
-           position.y >= 1 && position.y <= maxY &&
-           !blizzards.contains(position);
-
-    List<State> history = <State>[];
+        => (!blizzards.contains(position) &&
+            position.x >= 1 && position.x <= maxX &&
+            position.y >= 1 && position.y <= maxY) ||
+           (position.x == 1 && position.y == 0) ||
+           (position.x == maxX && position.y == maxY + 1);
 }
 
-printMap(Set<Position> blizzards, Position me, int maxX, int maxY) {
-    for (var y = 0; y < maxY + 2; y++) {
-        final row = <String>[];
-        for (var x = 0; x < maxX + 2; x++) {
-            if (x == me.x && y == me.y) row.add("E");
-            else if (y == 0 || y == maxY + 1) row.add("#");
-            else if (x == 0 || x == maxX + 1) row.add("#");
-            else if (blizzards.contains(new Position(x, y))) row.add("*");
-            else row.add(" ");
+int duration(State start, Position end, Map<int, Set<Position>> blizzardPositions, int maxX, int maxY) {
+    final visited = new Set<String>();
+    final stack = List<State>.from([start]);
+    while (stack.length != 0) {
+        final state = stack.removeAt(0);
+        if (state.position.x == end.x && state.position.y == end.y) {
+            return state.minute;
         }
-        print(row.join());
+
+        if (visited.add("${state.position} ${state.minute}"))
+            stack.addAll(state.nextStates(blizzardPositions, maxX, maxY));
     }
-    print("");
+
+    throw new Exception();
+}
+
+int lcm(int a, int b)
+    => (a * b) ~/ gcd(a, b);
+
+int gcd(int a, int b) {
+    while (b != 0) {
+        final t = b;
+        b = a % t;
+        a = t;
+    }
+    return a;
 }
 
 solve(List<String> lines) {
@@ -108,29 +113,21 @@ solve(List<String> lines) {
     final maxX = lines[0].length - 2;
     final maxY = lines.length - 2;
 
-    final states = new Map<int, Set<Position>>();
-    final maxMinute = maxX * maxY;
-    var minute = -1;
-    while (minute <= maxMinute) {
-        states[minute++] = blizzards.map((blizzard) => blizzard.position).toSet();
+    final blizzardPositions = new Map<int, Set<Position>>();
+    final maxMinute = lcm(maxX, maxY);
+    var minute = 0;
+    while (minute < maxMinute) {
+        blizzardPositions[minute++] = blizzards.map((blizzard) => blizzard.position).toSet();
         for (final blizzard in blizzards) {
             blizzard.move(maxX, maxY);
         }
     }
 
-    final visited = new Set<String>();
-
-    final stack = List<State>.from([new State(new Position(1, 0), 0)]);
-    while (stack.length != 0) {
-        final state = stack.removeAt(0);
-        if (state.position.x == maxX && state.position.y == maxY) {
-            print("${state.minute + 1}");
-            return;
-        }
-
-        if (!visited.add("${state.position} ${state.minute}")) continue;
-        stack.addAll(state.nextStates(states, maxX, maxY));
-    }
+    var minutes = duration(new State(new Position(1, 0), 0), new Position(maxX, maxY), blizzardPositions, maxX, maxY);
+    print(++minutes);
+    minutes = duration(new State(new Position(maxX, maxY + 1), minutes), new Position(1, 1), blizzardPositions, maxX, maxY);
+    minutes = duration(new State(new Position(1, 0), minutes + 1), new Position(maxX, maxY), blizzardPositions, maxX, maxY);
+    print(++minutes);
 }
 
 void main() {
