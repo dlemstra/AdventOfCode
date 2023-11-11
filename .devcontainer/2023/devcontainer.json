@@ -1,0 +1,14 @@
+{
+    "name": "PHP",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "bmewburn.vscode-intelephense-client"
+            ],
+            "recommendations": []
+        }
+    }
+}
