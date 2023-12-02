@@ -2,11 +2,13 @@
 
 $lines = file('input');
 
-$total = 0;
+$part1 = 0;
+$part2 = 0;
 foreach ($lines as $line) {
     $info = explode(': ', $line);
     $reveals = explode('; ', $info[1]);
     $possible = true;
+    $maxRed = $maxGreen = $maxBlue = 0;
     foreach ($reveals as $revealed) {
         $cubes = explode(', ', $revealed);
         $red = $green = $blue = 0;
@@ -24,16 +26,20 @@ foreach ($lines as $line) {
                     break;
             }
         }
+        $maxRed = max($maxRed, $red);
+        $maxGreen = max($maxGreen, $green);
+        $maxBlue = max($maxBlue, $blue);
         if ($red > 12 || $green > 13 || $blue > 14) {
             $possible = false;
-            break;
         }
     }
 
+    $part2 += $maxRed * $maxGreen * $maxBlue;
     if ($possible === true) {
         $id = explode(' ', $info[0])[1];
-        $total += $id;
+        $part1 += $id;
     }
 }
 
-echo $total . "\n";
+echo $part1 . "\n";
+echo $part2 . "\n";
