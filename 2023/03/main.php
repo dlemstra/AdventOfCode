@@ -57,3 +57,54 @@ for ($i = 0; $i < count($lines); $i++) {
 }
 
 echo $total . "\n";
+
+function findNumber($line, $i, $numbers)
+{
+    if (count($numbers) == 2 || !ctype_digit($line[$i])) return $numbers;
+
+    $value = $line[$i];
+    $k = $i - 1;
+    while ($k >= 0 && ctype_digit($line[$k])) {
+        $value = $line[$k] . $value;
+        $k--;
+    }
+    $k = $i + 1;
+    while ($k < strlen($line) && ctype_digit($line[$k])) {
+        $value = $value . $line[$k];
+        $k++;
+    }
+
+    $numbers[] = (int)$value;
+    $numbers = array_unique($numbers);
+    return $numbers;
+}
+
+$total = 0;
+$count = count($lines);
+for ($i = 0; $i < $count; $i++) {
+    $line = $lines[$i];
+    for ($j = 0; $j < strlen($line); ++$j) {
+        if ($line[$j] == '*') {
+            $numbers = [];
+
+            $numbers = findNumber($line, $j - 1, $numbers);
+            $numbers = findNumber($line, $j + 1, $numbers);
+            if ($i > 0) {
+                $numbers = findNumber($lines[$i - 1], $j - 1, $numbers);
+                $numbers = findNumber($lines[$i - 1], $j + 1, $numbers);
+                $numbers = findNumber($lines[$i - 1], $j, $numbers);
+            }
+            if ($i < $count - 1) {
+                $numbers = findNumber($lines[$i + 1], $j - 1, $numbers);
+                $numbers = findNumber($lines[$i + 1], $j + 1, $numbers);
+                $numbers = findNumber($lines[$i + 1], $j, $numbers);
+            }
+
+            if (count($numbers) == 2) {
+                $total += $numbers[0] * $numbers[1];
+            }
+        }
+    }
+}
+
+echo $total . "\n";
