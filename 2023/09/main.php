@@ -23,11 +23,8 @@ class Item
     }
 }
 
-$lines = file('input', FILE_IGNORE_NEW_LINES);
-
-$part1 = 0;
-foreach ($lines as $line) {
-    $sequence = explode(' ', $line);
+function calculateNext(array $sequence): int
+{
     $count = count($sequence) - 1;
 
     $sequenceIndex = 3;
@@ -54,7 +51,18 @@ foreach ($lines as $line) {
         $items[$i - 1]->setEnd($items[$i - 1]->end + $items[$i]->end);
     }
 
-    $part1 += $sequence[$sequenceIndex - 1] + $items[0]->end;
+    return $sequence[$sequenceIndex - 1] + $items[0]->end;
+}
+
+$lines = file('input', FILE_IGNORE_NEW_LINES);
+
+$part1 = 0;
+$part2 = 0;
+foreach ($lines as $line) {
+    $sequence = explode(' ', $line);
+    $part1 += calculateNext($sequence);
+    $part2 += calculateNext(array_reverse($sequence));
 }
 
 echo $part1 . "\n";
+echo $part2 . "\n";
