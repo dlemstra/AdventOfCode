@@ -1,51 +1,77 @@
 <?php
 
-$lines = file('input', FILE_IGNORE_NEW_LINES);
-
-function findMatches($line, $counts)
+class Solver
 {
-    $matches = 0;
-    $questionCount = substr_count($line, '?');
-    $combinations = pow(2, $questionCount);
+    private $cache = [];
+    private $counts = [];
+    private $pattern = "";
 
-    for ($i = 0; $i < $combinations; $i++) {
-        $binary = str_pad(decbin($i), $questionCount, '0', STR_PAD_LEFT);
+    public function __construct(string $pattern, array $counts, int $times)
+    {
+        for ($i = 0; $i < $times; $i++) {
+            if ($i > 0)
+                $this->pattern .= "?";
 
-        $permutation = $line;
-        for ($j = 0; $j < $questionCount; $j++) {
-            $permutation = preg_replace('/\?/', $binary[$j] == '0' ? '.' : '#', $permutation, 1);
+            $this->pattern .= $pattern;
+            $this->counts = array_merge($this->counts, $counts);
         }
-
-        $count = 0;
-        $permutationCount = [];
-        for ($k = 0; $k < strlen($permutation); $k++) {
-            if ($permutation[$k] == '.') {
-                if ($count > 0) {
-                    $permutationCount[] = $count;
-                    $count = 0;
-                }
-            } else {
-                $count++;
-            }
-        }
-
-        if ($count > 0)
-            $permutationCount[] = $count;
-
-        if ($permutationCount == $counts)
-            $matches++;
     }
 
-    return $matches;
+    public function solve(): int
+    {
+        return $this->countPossibilities($this->pattern, $this->counts);
+    }
+
+    private function countPossibilities($pattern, $counts, $groupMemberCount = 0)
+    {
+        if ($pattern == "") {
+            $count = count($counts);
+            return ($count == 0 & $groupMemberCount == 0) || ($count == 1 && $counts[0] == $groupMemberCount);
+        }
+
+        $cacheKey = $pattern . "[" . implode(",", $counts) . "]" . $groupMemberCount;
+        if (isset($this->cache[$cacheKey]))
+            return $this->cache[$cacheKey];
+
+        $count = 0;
+        $remaining = substr($pattern, 1);
+        switch ($pattern[0]) {
+            case "?":
+                $count = $this->countPossibilities("#" . $remaining, $counts, $groupMemberCount);
+                $count += $this->countPossibilities("." . $remaining, $counts, $groupMemberCount);
+                break;
+            case "#":
+                $count = $this->countPossibilities($remaining, $counts, $groupMemberCount + 1);
+                break;
+            case ".":
+                if ($groupMemberCount > 0) {
+                    if (!empty($counts) && $counts[0] == $groupMemberCount) {
+                        $count = $this->countPossibilities($remaining, array_slice($counts, 1));
+                    }
+                } else {
+                    $count = $this->countPossibilities($remaining, $counts);
+                }
+                break;
+        }
+
+        $this->cache[$cacheKey] = $count;
+        return $count;
+    }
 }
 
+$lines = file('input', FILE_IGNORE_NEW_LINES);
+
 $part1 = 0;
+$part2 = 0;
 foreach ($lines as $line) {
     $parts = explode(' ', $line);
-    $counts = explode(',', $parts[1]);
 
-    $part1 += findMatches($parts[0], $counts);
-    echo $part1 . "\n";
+    $solver = new Solver($parts[0], explode(',', $parts[1]), 1);
+    $part1 += $solver->solve();
+
+    $solver = new Solver($parts[0], explode(',', $parts[1]), 5);
+    $part2 += $solver->solve();
 }
 
 echo $part1 . "\n";
+echo $part2 . "\n";
