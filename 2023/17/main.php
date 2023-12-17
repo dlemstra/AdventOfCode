@@ -18,6 +18,77 @@ enum Direction: int
     }
 }
 
+class Grid
+{
+    public readonly int $maxX;
+    public readonly int $maxY;
+    public readonly int $maxSteps;
+    public readonly int $minStepsBeforeMove;
+    private readonly array $grid;
+
+    public function __construct(array $grid, int $maxSteps, int $minStepsBeforeMove)
+    {
+        $this->grid = $grid;
+        $this->maxX = strlen($grid[0]);
+        $this->maxY = count($grid);
+        $this->maxSteps = $maxSteps;
+        $this->minStepsBeforeMove = $minStepsBeforeMove;
+    }
+
+    public function get(int $x, int $y): int
+    {
+        return (int) $this->grid[$y][$x];
+    }
+}
+
+class MoveQueueItem
+{
+    public readonly Move $move;
+    public ?MoveQueueItem $next = null;
+
+    public function __construct(Move $move)
+    {
+        $this->move = $move;
+    }
+}
+
+class MoveQueue
+{
+    private ?MoveQueueItem $first = null;
+
+    public function add(Move $move)
+    {
+        if ($this->first === null) {
+            $this->first = new MoveQueueItem($move);
+        } else {
+            $item = $this->first;
+            $newItem = new MoveQueueItem($move);
+
+            if ($move->isBetter($item->move)) {
+                $newItem->next = $item;
+                $this->first = $newItem;
+                return;
+            }
+
+            while ($item->next !== null) {
+                if ($move->isBetter($item->next->move)) {
+                    break;
+                }
+                $item = $item->next;
+            }
+
+            $newItem->next = $item->next;
+            $item->next = $newItem;
+        }
+    }
+
+    public function removeFirst(): Move
+    {
+        $move = $this->first->move;
+        $this->first = $this->first->next;
+        return $move;
+    }
+}
 
 class Move
 {
@@ -25,109 +96,134 @@ class Move
     private readonly int $y;
     private readonly Direction $direction;
     public readonly int $heatloss;
-    private readonly int $steps;
+    public readonly int $steps;
+    public readonly string $key;
 
-    public function __construct(int $x, int $y, Direction $direction, $heatloss = 0, $steps = 1)
+    public function __construct(int $x, int $y, Direction $direction, $heatloss, $steps)
     {
         $this->x = $x;
         $this->y = $y;
         $this->direction = $direction;
         $this->heatloss = $heatloss;
         $this->steps = $steps;
+        $this->key = $x . "x" . $y . "x" . $direction->toInt(). "x" . $steps;
     }
 
-    public function key()
+    public function isEnd(Grid $grid): bool
     {
-        return $this->x . "x" . $this->y . "x" . $this->direction->toInt() . "x" . $this->steps;
+        return $this->x === $grid->maxX - 1 && $this->y === $grid->maxY - 1;
     }
 
-    public function isCorner(int $maxX, int $maxY): bool
-    {
-        return $this->x === $maxX - 1 && $this->y === $maxY - 1;
-    }
-
-    public function nextMoves(array $grid, int $maxX, int $maxY): iterable
+    public function nextMoves(Grid $grid): iterable
     {
         switch ($this->direction) {
             case Direction::North:
-                if ($this->y > 0 && $this->steps < 3)
-                    yield new Move($this->x, $this->y - 1, Direction::North, $this->heatloss + (int) $grid[$this->y - 1][$this->x], $this->steps + 1);
-                if ($this->x > 0)
-                    yield new Move($this->x - 1, $this->y, Direction::West, $this->heatloss + (int) $grid[$this->y][$this->x - 1]);
-                if ($this->x < $maxX - 1)
-                    yield new Move($this->x + 1, $this->y, Direction::East, $this->heatloss + (int) $grid[$this->y][$this->x + 1]);
+                yield $this->createMove($this->x, $this->y - 1, Direction::North, $this->steps + 1, $grid);
+                if ($this->steps >= $grid->minStepsBeforeMove) {
+                    yield $this->createMove($this->x - 1, $this->y, Direction::West, 1, $grid);
+                    yield $this->createMove($this->x + 1, $this->y, Direction::East, 1, $grid);
+                }
                 break;
             case Direction::East:
-                if ($this->x < $maxX - 1 &&  $this->steps < 3)
-                    yield new Move($this->x + 1, $this->y, Direction::East, $this->heatloss + (int) $grid[$this->y][$this->x + 1], $this->steps + 1);
-                if ($this->y > 0)
-                    yield new Move($this->x, $this->y - 1, Direction::North, $this->heatloss + (int) $grid[$this->y - 1][$this->x]);
-                if ($this->y < $maxY - 1)
-                    yield new Move($this->x, $this->y + 1, Direction::South, $this->heatloss + (int) $grid[$this->y + 1][$this->x]);
+                yield $this->createMove($this->x + 1, $this->y, Direction::East, $this->steps + 1, $grid);
+                if ($this->steps >= $grid->minStepsBeforeMove) {
+                    yield $this->createMove($this->x, $this->y - 1, Direction::North, 1, $grid);
+                    yield $this->createMove($this->x, $this->y + 1, Direction::South, 1, $grid);
+                }
                 break;
             case Direction::South:
-                if ($this->y < $maxY - 1 && $this->steps < 3)
-                    yield new Move($this->x, $this->y + 1, Direction::South, $this->heatloss + (int) $grid[$this->y + 1][$this->x], $this->steps + 1);
-                if ($this->x > 0)
-                    yield new Move($this->x - 1, $this->y, Direction::West, $this->heatloss + (int) $grid[$this->y][$this->x - 1]);
-                if ($this->x < $maxX - 1)
-                    yield new Move($this->x + 1, $this->y, Direction::East, $this->heatloss + (int) $grid[$this->y][$this->x + 1]);
+                yield $this->createMove($this->x, $this->y + 1, Direction::South, $this->steps + 1, $grid);
+                if ($this->steps >= $grid->minStepsBeforeMove) {
+                    yield $this->createMove($this->x - 1, $this->y, Direction::West, 1, $grid);
+                    yield $this->createMove($this->x + 1, $this->y, Direction::East, 1, $grid);
+                }
                 break;
             case Direction::West:
-                if ($this->x > 0 && $this->steps < 3)
-                    yield new Move($this->x - 1, $this->y, Direction::West, $this->heatloss + (int) $grid[$this->y][$this->x - 1], $this->steps + 1);
-                if ($this->y > 0)
-                    yield new Move($this->x, $this->y - 1, Direction::North, $this->heatloss + (int) $grid[$this->y - 1][$this->x]);
-                if ($this->y < $maxY - 1)
-                    yield new Move($this->x, $this->y + 1, Direction::South, $this->heatloss + (int) $grid[$this->y + 1][$this->x]);
+                yield $this->createMove($this->x - 1, $this->y, Direction::West, $this->steps + 1, $grid);
+                if ($this->steps >= $grid->minStepsBeforeMove) {
+                    yield $this->createMove($this->x, $this->y - 1, Direction::North, 1, $grid);
+                    yield $this->createMove($this->x, $this->y + 1, Direction::South, 1, $grid);
+                }
                 break;
         }
+    }
+
+    public function isBetter(Move $other): bool
+    {
+        if ($this->heatloss < $other->heatloss)
+            return true;
+
+        if ($this->heatloss > $other->heatloss)
+            return false;
+
+        return $this->steps < $other->steps;
+    }
+
+    private function createMove(int $x, int $y, Direction $direction, int $steps, Grid $grid): ?Move
+    {
+        if ($x < 0 || $y < 0 || $x >= $grid->maxX || $y >= $grid->maxY || $steps > $grid->maxSteps)
+            return null;
+
+        if ($steps < $grid->minStepsBeforeMove) {
+            $minRequired = $grid->minStepsBeforeMove - $steps;
+            switch ($direction) {
+                case Direction::North:
+                    if ($y - $minRequired >= $grid->maxY) return null;
+                    break;
+                case Direction::East:
+                    if ($x + $minRequired >= $grid->maxX) return null;
+                    break;
+                case Direction::South:
+                    if ($y + $minRequired < 0) return null;
+                    break;
+                case Direction::West:
+                    if ($x - $minRequired < 0) return null;
+                    break;
+            }
+        }
+
+        $heatloss = $this->heatloss + $grid->get($x, $y);
+
+        return new Move($x, $y, $direction, $heatloss, $steps);
     }
 }
 
-function findLowestHeatloss(array &$moves): Move
+function findBestRoute(Grid $grid)
 {
-    $lowest = null;
-    $lowestIndex = -1;
+    $moves = new MoveQueue();
+    $moves->add(new Move(1, 0, Direction::East, $grid->get(1, 0), 1));
+    $moves->add(new Move(0, 1, Direction::South, $grid->get(0, 1), 1));
+    $visited = [];
 
-    foreach ($moves as $index => $move) {
-        if ($lowest === null || $move->heatloss < $lowest->heatloss) {
-            $lowest = $move;
-            $lowestIndex = $index;
+    echo "\n";
+
+    $value = 0;
+    while (true) {
+        $move = $moves->removeFirst();
+
+        if (isset($visited[$move->key]))
+            continue;
+
+        if ($move->isEnd($grid))
+            break;
+
+        $visited[$move->key] = $move->heatloss;
+
+        foreach ($move->nextMoves($grid) as $nextMove) {
+            if ($nextMove === null || (isset($visited[$nextMove->key]) && $nextMove->heatloss >= $visited[$nextMove->key]))
+                continue;
+
+            $moves->add($nextMove);
+        }
+
+        if ($value !== $move->heatloss) {
+            $value = $move->heatloss;
+            echo "\033[1A" .  $move->heatloss . "\n";
         }
     }
-
-    unset($moves[$lowestIndex]);
-
-    return $lowest;
 }
 
 $grid = file('input', FILE_IGNORE_NEW_LINES);
 
-$maxX = strlen($grid[0]);
-$maxY = count($grid);
-
-$moves = [new Move(1, 0, Direction::East, (int) $grid[0][1]), new Move(0, 1, Direction::South, (int) $grid[1][0])];
-$visited = [];
-
-while (count($moves) > 0) {
-    $move = findLowestHeatloss($moves);
-
-    if (isset($visited[$move->key()])) {
-        continue;
-    }
-
-    if ($move->isCorner($maxX, $maxY)) {
-        echo $move->heatloss . "\n";
-        break;
-    }
-
-    $visited[$move->key()] = $move->heatloss;
-
-    foreach ($move->nextMoves($grid, $maxX, $maxY) as $nextMove) {
-        if (isset($visited[$nextMove->key()]) && $nextMove->heatloss >= $visited[$nextMove->key()])
-            continue;
-
-        $moves[] = $nextMove;
-    }
-}
+findBestRoute(new Grid($grid, 3, 1));
+findBestRoute(new Grid($grid, 10, 4));
