@@ -73,14 +73,14 @@ class FlipFlop extends Module
 
 class Conjunction extends Module
 {
-    private array $history = [];
+    public array $inputs = [];
 
     public function receivePulse(string $source, bool $value): iterable
     {
-        $this->history[$source] = $value;
+        $this->inputs[$source] = $value;
 
         $value = false;
-        foreach ($this->history as $pulse) {
+        foreach ($this->inputs as $pulse) {
             if ($pulse === false) {
                 $value = true;
                 break;
@@ -107,6 +107,17 @@ class Signal
     }
 }
 
+function findRxParent($modules): string
+{
+    foreach ($modules as $module) {
+        if (array_search("rx", $module->targets) !== false) {
+            return $module->name;
+        }
+    }
+
+    throw new Error("No parent found");
+}
+
 $lines = file('input', FILE_IGNORE_NEW_LINES);
 
 $modules = [];
@@ -125,10 +136,25 @@ foreach ($modules as $module) {
     }
 }
 
+function lcm(int $a, int $b)
+{
+    $gcd = function ($a, $b) use (&$gcd) {
+        return ($a % $b) ? $gcd($b, $a % $b) : $b;
+    };
+
+    return abs($a * $b) / $gcd($a, $b);
+}
+
 $lowCount = 0;
 $highCount = 0;
+$rxParent = findRxParent($modules);
+$rxParentInputCount = count($modules[$rxParent]->inputs);
+$rxParentHigh = [];
+$rxParentDone = 0;
 
-for ($i = 0; $i < 1000; $i++) {
+$part1 = 0;
+
+for ($i = 0; $i < 10000; $i++) {
     $signals = [new Signal("button", false, "broadcaster")];
     while (count($signals) > 0) {
         $signal = array_shift($signals);
@@ -138,6 +164,15 @@ for ($i = 0; $i < 1000; $i++) {
         else
             $lowCount++;
 
+        if ($signal->value && $signal->target == $rxParent) {
+            if (!isset($rxParentHigh[$signal->source]))
+                $rxParentHigh[$signal->source] = $i;
+            else {
+                $rxParentHigh[$signal->source] = $i - $rxParentHigh[$signal->source];
+                $rxParentDone++;
+            }
+        }
+
         if (!isset($modules[$signal->target]))
             continue;
 
@@ -145,6 +180,21 @@ for ($i = 0; $i < 1000; $i++) {
             $signals[] = $newSignal;
         }
     }
+
+    if ($i == 999)
+        $part1 = $lowCount * $highCount . "\n";
+
+    if ($rxParentDone == $rxParentInputCount) {
+        break;
+    }
 }
 
-echo $lowCount * $highCount . "\n";
+echo $part1;
+
+$part2 = 1;
+$values = array_values($rxParentHigh);
+for ($i = 0; $i < count($values); $i++) {
+    $part2 = lcm($part2, $values[$i]);
+}
+
+echo $part2 . "\n";
