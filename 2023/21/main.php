@@ -1,79 +1,119 @@
 <?php
 class Position
 {
-    public $x;
-    public $y;
-    public $steps;
+    public readonly int $x;
+    public readonly int $y;
 
-    public function __construct(int $x, int $y, $steps = 0)
+    public function __construct(int $x, int $y)
     {
         $this->x = $x;
         $this->y = $y;
-        $this->steps = $steps;
     }
 
     public function key()
     {
-        return $this->x . "x" . $this->y . "x" . $this->steps;
+        return $this->x . "x" . $this->y;
     }
 }
 
-$grid = file('input', FILE_IGNORE_NEW_LINES);
+function getPosition(array $grid, int $x, int $y, array &$visited, int $size): ?Position
+{
+    $pos = new Position($x, $y);
 
-$maxX = strlen($grid[0]);
-$maxY = count($grid);
+    if ($x < 0) $x = $size - abs($x % $size);
+    if ($x >= $size) $x = $x % $size;
+    if ($y < 0) $y = $size - abs($y % $size);
+    if ($y >= $size) $y = $y % $size;
 
-$positions = [];
-for ($y = 0; $y < $maxY && count($positions) == 0; $y++) {
-    for ($x = 0; $x < $maxX; $x++) {
-        if ($grid[$y][$x] === 'S') {
-            $positions[] = new Position($x, $y);
-            break;
-        }
+    if ($grid[$y][$x] === '#') {
+        return null;
     }
-}
-
-$part1 = 0;
-$visited = [];
-$maxSteps = 64;
-while (count($positions) > 0) {
-    $pos = array_shift($positions);
 
     if (isset($visited[$pos->key()])) {
-        continue;
+        return null;
     }
 
     $visited[$pos->key()] = true;
 
-    if ($pos->steps == $maxSteps) {
-        $part1++;
-        continue;
-    }
-
-    if ($pos->x > 0 && $grid[$pos->y][$pos->x - 1] !== '#') {
-        $newPos =  new Position($pos->x - 1, $pos->y, $pos->steps + 1);
-        if (!isset($visited[$newPos->key()])) {
-            $positions[] = $newPos;
-        }
-    }
-    if ($pos->x < $maxX - 1 && $grid[$pos->y][$pos->x + 1] !== '#') {
-        $newPos = new Position($pos->x + 1, $pos->y, $pos->steps + 1);
-        if (!isset($visited[$newPos->key()])) {
-            $positions[] = $newPos;
-        }
-    }
-    if ($pos->y > 0 && $grid[$pos->y - 1][$pos->x] !== '#') {
-        $newPos = new Position($pos->x, $pos->y - 1, $pos->steps + 1);
-        if (!isset($visited[$newPos->key()])) {
-            $positions[] = $newPos;
-        }
-    }
-    if ($pos->y < $maxY - 1 && $grid[$pos->y + 1][$pos->x] !== '#') {
-        $newPos = new Position($pos->x, $pos->y + 1, $pos->steps + 1);
-        if (!isset($visited[$newPos->key()])) {
-            $positions[] = $newPos;
-        }
-    }
+    return $pos;
 }
 
-echo $part1 . "\n";
+function countPlots(array $grid, int $size, array &$startPositions, int $maxSteps): array
+{
+    $positions = $startPositions;
+    for ($i = 0; $i < $maxSteps; $i++) {
+        $newPositions = [];
+        $visited = [];
+        foreach ($positions as $pos) {
+            $newPos = getPosition($grid, $pos->x - 1, $pos->y, $visited, $size);
+            if ($newPos !== null)
+                $newPositions[] = $newPos;
+
+            $newPos = getPosition($grid, $pos->x + 1, $pos->y, $visited, $size);
+            if ($newPos !== null)
+                $newPositions[] = $newPos;
+
+            $newPos = getPosition($grid, $pos->x, $pos->y - 1, $visited, $size);
+            if ($newPos !== null)
+                $newPositions[] = $newPos;
+
+            $newPos = getPosition($grid, $pos->x, $pos->y + 1, $visited, $size);
+            if ($newPos !== null)
+                $newPositions[] = $newPos;
+        }
+
+        $positions = $newPositions;
+    }
+
+    return $positions;
+}
+
+$grid = file('input', FILE_IGNORE_NEW_LINES);
+
+$size = strlen($grid[0]);
+$center = floor($size / 2);
+$positions = [new Position($center, $center)];
+
+$steps = 26501365;
+$start = $steps % $size;
+if ($start === 0) $start = $size;
+
+$i = 64;
+$positions = countPlots($grid, $size, $positions, $i);
+echo count($positions) . "\n";
+while ($i++ % $start !== 0) {
+    $positions = countPlots($grid, $size, $positions, 1);
+}
+
+$prev = 0;
+$prevDelta = 0;
+$diffIndex = 0;
+$diffs = [0, 0];
+for ($i = 1; $i < 10; $i++) {
+    $positions = countPlots($grid, $size, $positions, $size);
+    $count = count($positions);
+    $delta = $count - $prev;
+    $prev = $count;
+    $newDelta = $delta - $prevDelta;
+    $diff = $newDelta - $prevDelta;
+    $prevDelta = $newDelta;
+    if ($diffs[$diffIndex % 2] === $diff)
+        break;
+    $diffs[$diffIndex % 2]  = $diff;
+    $diffIndex++;
+}
+
+$part2 = $count;
+$stepSize = $prevDelta;
+$stepSize += $diffs[0];
+$stepSize += $stepSize + $diffs[1];
+$stepSize = ($stepSize - $delta)  / 2;
+
+$i = ($i +1) * $size;
+while ($i < $steps) {
+    $delta += $stepSize;
+    $part2 += $delta;
+    $i += $size;
+}
+
+echo $part2  . "\n";
