@@ -55,12 +55,6 @@ class Brick
         $this->done = $this->start->z === 1;
     }
 
-    public function checkCollision(Brick $other) {
-        return $this->start->x <= $other->end->x && $this->end->x >= $other->start->x
-            && $this->start->y <= $other->end->y && $this->end->y >= $other->start->y
-            && $this->start->z <= $other->end->z && $this->end->z >= $other->start->z;
-    }
-
     public function moveDown(array $bricks): bool
     {
         if ($this->done) {
@@ -89,27 +83,32 @@ class Brick
 
         return $canMoveDown;
     }
+
+    private function checkCollision(Brick $other)
+    {
+        return $this->start->x <= $other->end->x && $this->end->x >= $other->start->x
+            && $this->start->y <= $other->end->y && $this->end->y >= $other->start->y
+            && $this->start->z <= $other->end->z && $this->end->z >= $other->start->z;
+    }
 }
 
-function moveBricksDown(&$bricks, bool $earlyExit = false): bool
+function moveBricksDown(&$bricks): int
 {
-    $moved = false;
+    $moved = 0;
     foreach ($bricks as $brick) {
-        $moved = $brick->moveDown($bricks) || $moved;
-        if ($earlyExit && $moved) break;
+        if ($brick->moveDown($bricks)) $moved++;
     }
 
     return $moved;
 }
 
-function removeBrick(array $bricks): iterable
+function removeBricks(array $bricks): iterable
 {
     foreach ($bricks as $brick) {
         $newBricks = [];
-        foreach($bricks as $other) {
-            if ($other->id !== $brick->id) {
+        foreach ($bricks as $other) {
+            if ($other->id !== $brick->id)
                 $newBricks[] = new Brick($other->id, clone $other->start, clone $other->end);
-            }
         }
         yield $newBricks;
     }
@@ -135,10 +134,14 @@ while (moveBricksDown($bricks));
 
 echo "0\n";
 
-$count = 0;
-foreach (removeBrick($bricks) as $updatedBricks) {
-    if (!moveBricksDown($updatedBricks, earlyExit: true))
-        $count++;
-    echo "\033[1A" . $count . "\n";
+$part1 = 0;
+$part2 = 0;
+foreach (removeBricks($bricks) as $updatedBricks) {
+    $moved = moveBricksDown($updatedBricks);
+    $part2 += $moved;
+    if (!$moved)
+        $part1++;
+    echo "\033[1A" . $part1 . "\n";
 }
 echo "\033[1A\n";
+echo "$part2\n";
