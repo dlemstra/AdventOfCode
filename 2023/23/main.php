@@ -17,6 +17,21 @@ class Grid
     {
         return $this->grid[$y][$x];
     }
+
+    public function loadIntersections(): array
+    {
+        $intersections = [];
+        for ($y = 0; $y < $this->maxY; $y++) {
+            for ($x = 0; $x < $this->maxX; $x++) {
+                $position =  new Position($x, $y);
+                $neighbours = $position->getNeighbours($this, true);
+                if ($this->get($x, $y) === '.' && ($y === 0 || $y === $this->maxY - 1 || count($neighbours) > 2))
+                    $intersections[$x][$y] = new Intersection($position);
+            }
+        }
+
+        return $intersections;
+    }
 }
 
 class Position
@@ -24,60 +39,154 @@ class Position
     public readonly int $x;
     public readonly int $y;
     public readonly int $steps;
-    private array $visited;
 
-    public function __construct(int $x, int $y, int $steps = 0, array $visited = [])
+    public function __construct(int $x, int $y, int $steps = 0)
     {
         $this->x = $x;
         $this->y = $y;
         $this->steps = $steps;
-        $this->visited = $visited;
     }
 
-    public function getNextSteps(Grid $grid): iterable
+    function getNeighbours(Grid $grid, bool $climbSteepSlopes): array
     {
-        $newPositions = [[$this->x, $this->y - 1], [$this->x + 1, $this->y], [$this->x, $this->y + 1], [$this->x - 1, $this->y]];
-        switch ($grid->get($this->x, $this->y)) {
-            case '^':
-                $position = $this->createPosition($grid, $newPositions[0][0], $newPositions[0][1]);
-                if ($position !== null) yield $position;
-                break;
-            case '>':
-                $position = $this->createPosition($grid, $newPositions[1][0], $newPositions[1][1]);
-                if ($position !== null) yield $position;
-                break;
-            case 'v':
-                $position = $this->createPosition($grid, $newPositions[2][0], $newPositions[2][1]);
-                if ($position !== null) yield $position;
-                break;
-            case '<':
-                $position = $this->createPosition($grid, $newPositions[3][0], $newPositions[3][1]);
-                if ($position !== null) yield $position;
-                break;
-            default:
-                foreach ($newPositions as $newPosition) {
-                    $position = $this->createPosition($grid, $newPosition[0], $newPosition[1]);
-                    if ($position !== null)
-                        yield $position;
+        $newPositions = [];
+        foreach ([[$this->x, $this->y - 1], [$this->x + 1, $this->y], [$this->x, $this->y + 1], [$this->x - 1, $this->y]] as $index => $pos) {
+            if (!$climbSteepSlopes) {
+                $skip = false;
+                switch ($grid->get($this->x, $this->y)) {
+                    case '^':
+                        if ($index !== 0) $skip = true;
+                        break;
+                    case '>':
+                        if ($index !== 1) $skip = true;
+                        break;
+                    case 'v':
+                        if ($index !== 2) $skip = true;
+                        break;
+                    case '<':
+                        if ($index !== 3) $skip = true;
+                        break;
                 }
-                break;
+
+                if ($skip)
+                    continue;
+            }
+
+            $position = new Position($pos[0], $pos[1], $this->steps + 1);
+            if ($position->x < 0 || $position->x >= $grid->maxX || $position->y < 0 || $position->y >= $grid->maxY)
+                continue;
+
+            if ($grid->get($position->x, $position->y) === '#')
+                continue;
+
+            $newPositions[] = $position;
+        }
+
+        return $newPositions;
+    }
+}
+
+class Intersection
+{
+    public readonly Position $position;
+    public array $connections;
+
+    public function __construct(Position $position)
+    {
+        $this->position = $position;
+    }
+
+    function setConnections(Grid $grid, array $intersections, bool $climbSteepSlopes = false)
+    {
+        $this->connections = [];
+
+        $visited = [];
+        $positions = [$this->position];
+        while (count($positions) > 0) {
+            $position = array_pop($positions);
+
+            if (isset($visited[$position->x][$position->y]))
+                continue;
+
+            if (isset($intersections[$position->x][$position->y]) && $intersections[$position->x][$position->y] !== $this) {
+                $this->connections[] = $position;
+                continue;
+            }
+
+            $visited[$position->x][$position->y] = true;
+
+            foreach ($position->getNeighbours($grid, $climbSteepSlopes) as $nextPosition) {
+                $positions[] = $nextPosition;
+            }
+        }
+    }
+}
+
+class Hike
+{
+    public readonly Position $position;
+    public readonly int $steps;
+    public array $visited;
+
+    public function __construct(Position $position, int $steps = 0)
+    {
+        $this->position = $position;
+        $this->steps = $steps;
+        $this->visited = [];
+    }
+
+    public static function createNext(Position $position, Hike $previous): Hike
+    {
+        $hike = new Hike($position, $previous->steps + $position->steps);
+        foreach ($previous->visited as $x => $y) {
+            foreach ($y as $y => $_) {
+                $hike->visited[$x][$y] = true;
+            }
+        }
+        $hike->visited[$previous->position->x][$previous->position->y] = true;
+
+        return $hike;
+    }
+
+    public function hasVisited(Position $position): bool
+    {
+        return isset($this->visited[$position->x][$position->y]);
+    }
+}
+
+function findLongestWalk(Grid $grid, array $intersections, bool $climbSteepSlopes = false) {
+    $startPosition = null;
+    foreach ($intersections as $_ => $yPositions) {
+        foreach ($yPositions as $intersection) {
+            $intersection->setConnections($grid, $intersections, $climbSteepSlopes);
+            if ($intersection->position->y === 0)
+                $startPosition = $intersection->position;
         }
     }
 
-    public function createPosition(Grid $grid, int $x, int $y): ?Position
-    {
-        if ($x < 0 || $x >= $grid->maxX || $y < 0 || $y >= $grid->maxY)
-            return null;
+    $longest = 0;
+    echo "$longest\n";
 
-        if ($grid->get($x, $y) == '#')
-            return null;
+    $hikes = [new Hike($startPosition)];
+    while (count($hikes) > 0) {
+        $hike = array_pop($hikes);
 
-        if (isset($this->visited[$x][$y]))
-            return null;
+        $intersection = $intersections[$hike->position->x][$hike->position->y];
 
-        $this->visited[$x][$y] = true;
+        if ($intersection->position->y === $grid->maxY - 1) {
+            if ($hike->steps > $longest) {
+                $longest = $hike->steps;
+                echo "\033[1A" . $longest . "\n";
+            }
+            continue;
+        }
 
-        return new Position($x, $y, $this->steps + 1, $this->visited);
+        foreach ($intersection->connections as $connection) {
+            if ($hike->hasVisited($connection))
+                continue;
+
+            $hikes[] = Hike::createNext($connection, $hike);
+        }
     }
 }
 
@@ -85,31 +194,7 @@ $grid = file('input', FILE_IGNORE_NEW_LINES);
 
 $grid = new Grid($grid);
 
-$y = 0;
-for ($x = 0; $x < $grid->maxX; $x++) {
-    if ($grid->get($x, 0) == '.')
-        break;
-}
+$intersections = $grid->loadIntersections($grid);
 
-$visted = [];
-$positions = [new Position($x, $y)];
-
-$part1 = 0;
-while (count($positions) > 0) {
-    $position = array_pop($positions);
-
-    if (isset($visted[$position->x][$position->y]) && $visted[$position->x][$position->y] > $position->steps)
-        continue;
-
-    $visted[$position->x][$position->y] = $position->steps;
-
-    foreach ($position->getNextSteps($grid) as $nextPosition) {
-        if ($nextPosition->y === $grid->maxY - 1) {
-            $part1 = max($part1, $nextPosition->steps);
-        }
-
-        $positions[] = $nextPosition;
-    }
-}
-
-echo $part1 . "\n";
+findLongestWalk($grid, $intersections);
+findLongestWalk($grid, $intersections, $climbSteepSlopes = true);
