@@ -1,0 +1,18 @@
+{
+    "name": "C#",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "postStartCommand": "mkdir -p /workspaces/AdventOfCode/2024/bin/Debug/net9.0-browser/wwwroot && cd /workspaces/AdventOfCode/2024/bin/Debug/net9.0-browser/wwwroot && python3 -m http.server 4143",
+    "forwardPorts": [ 4143 ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "EditorConfig.EditorConfig",
+                "GitHub.copilot-chat",
+                "ms-dotnettools.csdevkit"
+            ],
+            "recommendations": []
+        }
+    }
+}
