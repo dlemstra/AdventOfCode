@@ -15,7 +15,33 @@ internal class Day1 : IPuzzle
 
     public string Part2(string input)
     {
-        return "part 2";
+        var (listA, listB) = ReadInput(input);
+
+        var total = 0;
+        var start = 0;
+        for (var i = 0; i < listA.Count; i++)
+        {
+            var a = listA[i];
+
+            var count = 0;
+            for (var j = start; j < listB.Count; j++)
+            {
+                var b = listB[j];
+
+                if (a == b)
+                {
+                    count++;
+                    total += a;
+                }
+                else if (b > a)
+                {
+                    start = j - count;
+                    break;
+                }
+            }
+        }
+
+        return total.ToString();
     }
 
     private static (List<int>, List<int>) ReadInput(string input)
