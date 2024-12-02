@@ -5,6 +5,7 @@ public partial class JavascriptExports
     private static readonly Dictionary<int, IPuzzle> _puzzles = new()
     {
         { 1, new Day1() },
+        { 2, new Day2() },
     };
 
     [JSExport]
