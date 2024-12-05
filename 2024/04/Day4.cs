@@ -30,7 +30,24 @@ internal class Day4 : IPuzzle
 
     public string Part2(string input)
     {
-        return "part2";
+        var grid = LoadGrid(input);
+
+        var total = 0;
+        for (var y = 0; y < grid.Length; y++)
+        {
+            var row = grid[y];
+            for (var x = 0; x < row.Length; x++)
+            {
+                if (grid[y][x] == 'A' &&
+                    ((matchCount(ref grid, x, y, -1, -1, "M") == 1 && matchCount(ref grid, x, y, 1, 1, "S") == 1) ||
+                     (matchCount(ref grid, x, y, -1, -1, "S") == 1 && matchCount(ref grid, x, y, 1, 1, "M") == 1)) &&
+                    ((matchCount(ref grid, x, y, 1, -1, "M") == 1 && matchCount(ref grid, x, y, -1, 1, "S") == 1) ||
+                     (matchCount(ref grid, x, y, 1, -1, "S") == 1 && matchCount(ref grid, x, y, -1, 1, "M") == 1)))
+                        total++;
+            }
+        }
+
+        return total.ToString();
     }
 
     private char[][] LoadGrid(string input)
