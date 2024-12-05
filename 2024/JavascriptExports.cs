@@ -2,20 +2,21 @@ using System.Runtime.InteropServices.JavaScript;
 
 public partial class JavascriptExports
 {
-    private static readonly Dictionary<int, IPuzzle> _puzzles = new()
-    {
-        { 1, new Day1() },
-        { 2, new Day2() },
-        { 3, new Day3() },
-        { 4, new Day4() },
-    };
+    private static readonly IReadOnlyList<IPuzzle> _puzzles = [
+        new Day1(),
+        new Day2(),
+        new Day3(),
+        new Day4(),
+        new Day5(),
+    ];
 
     [JSExport]
     internal static string GetPuzzleResult(int day, int part, string input)
     {
-        if (!_puzzles.TryGetValue(day, out var puzzle))
-            return $"Invalid day: {day}";
+        if (day < 1 || day > _puzzles.Count)
+            return $"Invalid day: {day}"; ;
 
+        var puzzle = _puzzles[day - 1];
         return part switch
         {
             1 => puzzle.Part1(input),
