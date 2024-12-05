@@ -14,20 +14,26 @@ function initializeInput(name) {
     return input;
 }
 
+function setResult(result) {
+    adventOfCode.result.innerText = result;
+    adventOfCode.button.disabled = false;
+}
+
 (async () => {
     const { dotnet } = await import('./_framework/dotnet.js');
     const { getAssemblyExports, getConfig } = await dotnet.create();
 
     const mainAssemblyName = getConfig().mainAssemblyName;
-    const assemblyExports  = await getAssemblyExports(mainAssemblyName);
+    const assemblyExports = await getAssemblyExports(mainAssemblyName);
     adventOfCode.getPuzzleResult = assemblyExports.JavascriptExports.GetPuzzleResult;
 })().then(() => {
     adventOfCode.day = initializeInput('day');
     adventOfCode.part = initializeInput('part');
     adventOfCode.input = initializeInput('input');
     adventOfCode.result = document.getElementById('result');
+    adventOfCode.button = document.getElementById('getResult');
 
-    document.getElementById('getResult').disabled = false;
+    adventOfCode.button.disabled = false;
 });
 
 function getPuzzleResult() {
@@ -35,5 +41,7 @@ function getPuzzleResult() {
     const part = parseInt(adventOfCode.part.value);
     const input = adventOfCode.input.value;
 
-    adventOfCode.result.innerText = adventOfCode.getPuzzleResult(day, part, input);
+    setResult('Loading...');
+    adventOfCode.button.disabled = true;
+    adventOfCode.getPuzzleResult(day, part, input);
 }
