@@ -43,5 +43,6 @@ function getPuzzleResult() {
 
     setResult('Loading...');
     adventOfCode.button.disabled = true;
-    adventOfCode.getPuzzleResult(day, part, input);
+    adventOfCode.getPuzzleResult(day, part, input)
+        .then(result => setResult(result));
 }
