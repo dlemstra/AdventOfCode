@@ -4,6 +4,18 @@ internal class Day10 : IPuzzle
     {
         var grid = LoadGrid(input);
 
+        return GetScoreSum(grid, trackVisited: true);
+    }
+
+    public string Part2(string input)
+    {
+        var grid = LoadGrid(input);
+
+        return GetScoreSum(grid, trackVisited: false);
+    }
+
+    private string GetScoreSum(int[][] grid, bool trackVisited)
+    {
         var total = 0;
         foreach (var (startX, startY) in GetStartingPositions(grid))
         {
@@ -16,7 +28,7 @@ internal class Day10 : IPuzzle
             {
                 var (number, x, y) = steps.Dequeue();
 
-                if (!visited.Add((number, x, y)))
+                if (trackVisited && !visited.Add((number, x, y)))
                     continue;
 
                 if (number == 9)
@@ -44,11 +56,6 @@ internal class Day10 : IPuzzle
         }
 
         return total.ToString();
-    }
-
-    public string Part2(string input)
-    {
-        return "Not implemented";
     }
 
     private IEnumerable<(int, int)> GetStartingPositions(int[][] grid)
