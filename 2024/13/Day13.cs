@@ -4,48 +4,45 @@ internal sealed class Day13 : IPuzzle
     {
         var lines = input.Split('\n');
 
-        var total = 0;
-
-        for (var i = 0; i < lines.Length; i++)
-        {
-            var aX = int.Parse(lines[i].Split(',')[0].Split('+')[1]);
-            var aY = int.Parse(lines[i++].Split('+')[2]);
-
-            var bX = int.Parse(lines[i].Split(',')[0].Split('+')[1]);
-            var bY = int.Parse(lines[i++].Split('+')[2]);
-
-            var prizeX = int.Parse(lines[i].Split(',')[0].Split('=')[1]);
-            var prizeY = int.Parse(lines[i++].Split('=')[2]);
-
-            var remainingX = prizeX;
-            var remainingY = prizeY;
-            var tokens = 0;
-            for (var aCount = 1; aCount < 101; aCount++)
-            {
-                remainingX -= aX;
-                remainingY -= aY;
-                if (remainingX < 0 || remainingY < 0)
-                    break;
-
-                if (remainingX % bX == 0 && remainingY % bY == 0)
-                {
-                    var bCount = remainingY / bY;
-                    if (bCount < 100 && remainingX / bX == bCount)
-                    {
-                        tokens = (aCount * 3) + bCount;
-                        break;
-                    }
-                }
-            }
-            if (tokens != 0)
-                total += tokens;
-        }
-
-        return total.ToString();
+        return CalculateTokens(lines, 0, 100);
     }
 
     public string Part2(string input)
     {
-        return "Not implemented";
+        var lines = input.Split('\n');
+
+        return CalculateTokens(lines, 10000000000000, long.MaxValue);
+    }
+
+    private string CalculateTokens(string[] lines, long addition, long maxTimes)
+    {
+        var total = 0L;
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var aX = long.Parse(lines[i].Split(',')[0].Split('+')[1]);
+            var aY = long.Parse(lines[i++].Split('+')[2]);
+
+            var bX = long.Parse(lines[i].Split(',')[0].Split('+')[1]);
+            var bY = long.Parse(lines[i++].Split('+')[2]);
+
+            var prizeX = long.Parse(lines[i].Split(',')[0].Split('=')[1]);
+            var prizeY = long.Parse(lines[i++].Split('=')[2]);
+
+            prizeX += addition;
+            prizeY += addition;
+
+            var countA = (prizeY * bX - prizeX * bY) / (aY * bX - aX * bY);
+            if (countA > maxTimes)
+                continue;
+
+            var countB = (prizeY * aX - prizeX * aY) / (bY * aX - bX * aY);
+            if (countB > maxTimes)
+                continue;
+
+            if ((countA * aX + countB * bX == prizeX) && (countA * aY + countB * bY == prizeY))
+                total += (countA * 3) + countB;
+        }
+
+        return total.ToString();
     }
 }
