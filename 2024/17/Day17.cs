@@ -2,16 +2,57 @@ internal sealed class Day17 : IPuzzle
 {
     public string Part1(string input)
     {
-        var lines = input.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToArray();
+        var (a, b, c, instructions) = LoadInstructions(input);
+
+        return string.Join(",", GetOutput(a, b, c, instructions));
+    }
+
+    public string Part2(string input)
+    {
+        var (a, b, c, instructions) = LoadInstructions(input);
+
+        var options = new LinkedList<(long, int)>();
+        options.AddLast((0, instructions.Length - 1));
+
+        while (options.Count > 0)
+        {
+            var (value, index) = options.First();
+            options.RemoveFirst();
+
+            for (var i = 0; i < 8; i++)
+            {
+                var newA = value + i;
+                var output = GetOutput(newA, b, c, instructions);
+                if (output[0] != instructions[index])
+                    continue;
+
+                if (index == 0)
+                    return newA.ToString();
+
+                options.AddLast((newA * 8, index - 1));
+            }
+        }
+
+        return "Not found";
+    }
+
+    private static (long, long, long, long[]) LoadInstructions(string input)
+    {
+        var lines = input.Split('\n', StringSplitOptions.RemoveEmptyEntries).ToList();
 
         var a = int.Parse(lines[0].Split(": ")[1]);
         var b = int.Parse(lines[1].Split(": ")[1]);
         var c = int.Parse(lines[2].Split(": ")[1]);
-        var instructions = lines[3].Split(": ")[1].Split(',').Select(int.Parse).ToArray();
+        var instructions = lines[3].Split(": ")[1].Split(',').Select(long.Parse).ToArray();
 
+        return (a, b, c, instructions);
+    }
+
+    private static IReadOnlyList<long> GetOutput(long a, long b, long c, IReadOnlyList<long> instructions)
+    {
         var i = 0;
-        var output = new List<int>();
-        while (i < instructions.Length - 1)
+        var output = new List<long>();
+        while (i < instructions.Count - 1)
         {
             var instruction = instructions[i];
             var literal = instructions[i + 1];
@@ -33,7 +74,7 @@ internal sealed class Day17 : IPuzzle
             switch (instruction)
             {
                 case 0:
-                    a = (int)(a / Math.Pow(2, combo));
+                    a = (long)(a / Math.Pow(2, combo));
                     break;
                 case 1:
                     b = b ^ literal;
@@ -43,7 +84,7 @@ internal sealed class Day17 : IPuzzle
                     break;
                 case 3:
                     if (a != 0)
-                        i = literal;
+                        i = (int)literal;
                     break;
                 case 4:
                     b = b ^ c;
@@ -52,19 +93,14 @@ internal sealed class Day17 : IPuzzle
                     output.Add(combo % 8);
                     break;
                 case 6:
-                    b = (int)(a / Math.Pow(2, combo));
+                    b = (long)(a / Math.Pow(2, combo));
                     break;
                 case 7:
-                    c = (int)(a / Math.Pow(2, combo));
+                    c = (long)(a / Math.Pow(2, combo));
                     break;
             }
         }
 
-        return string.Join(",", output);
-    }
-
-    public string Part2(string input)
-    {
-        return "Not implemented";
+        return output;
     }
 }
