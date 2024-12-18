@@ -2,16 +2,56 @@ internal sealed class Day18 : IPuzzle
 {
     public string Part1(string input)
     {
-        var fallingBytes = input.Split('\n').Select(s => s.Split(','))
-           .Select(s => (int.Parse(s[0]), int.Parse(s[1]))).ToArray();
+        var fallingBytes = CreateFallingBytes(input);
+        var steps = GetStepCount(fallingBytes, 1024);
+        if (steps is null)
+            return "Not found";
 
+        return steps.Value.ToString();
+    }
+
+    public string Part2(string input)
+    {
+        var fallingBytes = CreateFallingBytes(input);
+
+        var lastSuccess = 0;
+
+        var min = 0;
+        var max = fallingBytes.Length;
+        while (min < max)
+        {
+            var maxFailingBytes = (min + max) / 2 + 1;
+
+            if (GetStepCount(fallingBytes, maxFailingBytes) is null)
+            {
+                max = maxFailingBytes - 1;
+                continue;
+            }
+
+            min = maxFailingBytes;
+            lastSuccess = maxFailingBytes;
+        }
+
+        var fallingByte = fallingBytes[lastSuccess];
+
+        return $"{fallingByte.Item1},{fallingByte.Item2}";
+    }
+
+    private static (int, int)[] CreateFallingBytes(string input)
+        => input
+            .Split('\n')
+            .Select(s => s.Split(','))
+            .Select(s => (int.Parse(s[0]), int.Parse(s[1])))
+            .ToArray();
+
+    private static int? GetStepCount((int, int)[] fallingBytes, int maxFallingBytes)
+    {
         var visited = new Dictionary<(int, int), int>();
         var positions = new LinkedList<(int, int, int, HashSet<(int, int)>)>();
         positions.AddLast((0, 0, 0, []));
 
-        var best = int.MaxValue;
+        int? best = null;
         var bestMoves = new HashSet<(int, int)>();
-        var maxFallingBytes = 1024;
         while (positions.Count > 0)
         {
             var (x, y, steps, moves) = positions.Last();
@@ -19,11 +59,12 @@ internal sealed class Day18 : IPuzzle
 
             if (x == 70 && y == 70)
             {
-                if (steps < best)
+                if (best is null || steps < best)
                 {
                     best = steps;
                     bestMoves = moves;
                 }
+
                 continue;
             }
 
@@ -35,21 +76,16 @@ internal sealed class Day18 : IPuzzle
             var newMoves = new HashSet<(int, int)>(moves);
             newMoves.Add((x, y));
 
-            foreach (var (newX, newY) in findNextMoves(x, y, steps + 1, fallingBytes, maxFallingBytes))
+            foreach (var (newX, newY) in FindNextMoves(x, y, steps + 1, fallingBytes, maxFallingBytes))
             {
                 positions.AddFirst((newX, newY, steps + 1, newMoves));
             }
         }
 
-        return best.ToString();
+        return best;
     }
 
-    public string Part2(string input)
-    {
-        return "Not implemented";
-    }
-
-    private static IEnumerable<(int, int)> findNextMoves(int x, int y, int step, (int, int)[] fallingBytes, int maxFallingBytes)
+    private static IEnumerable<(int, int)> FindNextMoves(int x, int y, int step, (int, int)[] fallingBytes, int maxFallingBytes)
     {
         foreach (var (dx, dy) in new[] { (1, 0), (-1, 0), (0, 1), (0, -1) })
         {
