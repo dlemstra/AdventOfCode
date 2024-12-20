@@ -11,6 +11,9 @@
         <None Include="wwwroot\*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+         <EmbeddedResource Include="**\*\input">
+            <LogicalName>$([System.IO.Path]::GetDirectoryName(%(RecursiveDir)).TrimStart('0'))</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
 
 </Project>

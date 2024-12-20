@@ -26,15 +26,23 @@ function setResult(result) {
     const mainAssemblyName = getConfig().mainAssemblyName;
     const assemblyExports = await getAssemblyExports(mainAssemblyName);
     adventOfCode.getPuzzleResult = assemblyExports.JavascriptExports.GetPuzzleResult;
+    adventOfCode.GetInput = assemblyExports.JavascriptExports.GetInput;
 })().then(() => {
     adventOfCode.day = initializeInput('day');
     adventOfCode.part = initializeInput('part');
-    adventOfCode.input = initializeInput('input');
+    adventOfCode.input = document.getElementById('input');
     adventOfCode.result = document.getElementById('result');
     adventOfCode.button = document.getElementById('getResult');
 
-    adventOfCode.button.disabled = false;
+    getPuzzleInput(adventOfCode.day.value).then(() => {
+        adventOfCode.button.disabled = false
+    });
 });
+
+async function getPuzzleInput(day) {
+    var input = await adventOfCode.GetInput(day);
+    adventOfCode.input.value = input;
+}
 
 function getPuzzleResult() {
     const day = parseInt(adventOfCode.day.value);

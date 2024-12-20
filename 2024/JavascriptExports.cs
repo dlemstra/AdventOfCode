@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.InteropServices.JavaScript;
 
 public partial class JavascriptExports
@@ -31,6 +32,19 @@ public partial class JavascriptExports
             return $"Invalid day: {day}";
 
         return await Task.Run(() => ExecutePuzzle(_puzzles[day - 1], part, input));
+    }
+
+    [JSExport]
+    internal static async Task<string?> GetInput(string day)
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        using var stream = assembly.GetManifestResourceStream(day);
+        if (stream is null)
+            return null;
+
+        using var reader = new StreamReader(stream);
+        var input = await reader.ReadToEndAsync();
+        return input.TrimEnd();
     }
 
     private static string ExecutePuzzle(IPuzzle puzzle, int part, string input)
