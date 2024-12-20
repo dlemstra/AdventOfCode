@@ -1,12 +1,16 @@
 internal abstract class Puzzle : IPuzzle
 {
-    private long _previousIntermediateResult = -1;
+    private long _previousIntermediateResult = 0;
+    private long _delta = 0;
 
     protected async Task SetIntermediateResult(long value)
     {
-        if (value - _previousIntermediateResult > 10)
+        var delta = Math.Abs(value - _previousIntermediateResult);
+
+        if (delta >= _delta)
         {
             await JavascriptImports.SetIntermediateResult(value.ToString());
+            _delta = delta;
             _previousIntermediateResult = value;
         }
     }
