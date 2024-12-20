@@ -1,6 +1,6 @@
-internal sealed class Day15 : IPuzzle
+internal sealed class Day15 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var lines = input.Split('\n').Select(l => l.Trim()).ToArray();
         var emptyLine = Array.IndexOf(lines, "");
@@ -57,10 +57,10 @@ internal sealed class Day15 : IPuzzle
             }
         }
 
-        return GetSum(grid, 'O');
+        return ToString(GetSum(grid, 'O'));
     }
 
-    public string Part2(string input)
+    public override Task<string> Part2(string input)
     {
         var lines = input.Split('\n').Select(l => l.Trim()).ToArray();
         var emptyLine = Array.IndexOf(lines, "");
@@ -130,7 +130,7 @@ internal sealed class Day15 : IPuzzle
             }
         }
 
-        return GetSum(grid, '[');
+        return ToString(GetSum(grid, '['));
     }
 
     private static bool tryMoveBox1(char[][] grid, int x, int y, char move)
@@ -260,7 +260,7 @@ internal sealed class Day15 : IPuzzle
             _ => (0, 0),
         };
 
-    private static string GetSum(char[][] grid, char box)
+    private static int GetSum(char[][] grid, char box)
     {
         var total = 0;
         for (var yy = 0; yy < grid.Length; yy++)
@@ -273,6 +273,6 @@ internal sealed class Day15 : IPuzzle
             }
         }
 
-        return total.ToString();
+        return total;
     }
 }

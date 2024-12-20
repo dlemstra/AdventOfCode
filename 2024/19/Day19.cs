@@ -1,6 +1,6 @@
-internal sealed class Day19 : IPuzzle
+internal sealed class Day19 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var info = input.Split("\n");
         var patterns = info[0].Trim().Split(", ").ToList();
@@ -14,13 +14,16 @@ internal sealed class Day19 : IPuzzle
             var count = PossibleCount(towel, patterns, calculated);
 
             if (count != 0)
+            {
                 total += 1;
+                await SetIntermediateResult(total);
+            }
         }
 
         return total.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var info = input.Split("\n");
         var patterns = info[0].Trim().Split(", ").ToList();
@@ -32,6 +35,7 @@ internal sealed class Day19 : IPuzzle
         {
             var towel = info[i].Trim();
             total += PossibleCount(towel, patterns, calculated);
+            await SetIntermediateResult(total);
         }
 
         return total.ToString();

@@ -1,6 +1,6 @@
-internal sealed class Day14 : IPuzzle
+internal sealed class Day14 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var width = 101;
         var height = 103;
@@ -38,10 +38,10 @@ internal sealed class Day14 : IPuzzle
             }
         }
 
-        return (q1 * q2 * q3 * q4).ToString();
+        return ToString(q1 * q2 * q3 * q4);
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var width = 101;
         var height = 103;
@@ -70,6 +70,8 @@ internal sealed class Day14 : IPuzzle
 
             if (foundTree)
                 break;
+
+            await SetIntermediateResult(count);
         }
 
         return count.ToString();

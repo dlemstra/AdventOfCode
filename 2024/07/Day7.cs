@@ -1,6 +1,6 @@
-internal class Day7 : IPuzzle
+internal class Day7 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         long total = 0;
         foreach (var line in input.Split('\n'))
@@ -10,13 +10,16 @@ internal class Day7 : IPuzzle
             var numbers = info[1].Split(" ").Select(long.Parse).ToArray();
 
             if (IsValid(numbers[0], 1, numbers, number))
+            {
                 total += number;
+                await SetIntermediateResult(total);
+            }
         }
 
         return total.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         long total = 0;
         foreach (var line in input.Split('\n'))
@@ -26,7 +29,10 @@ internal class Day7 : IPuzzle
             var numbers = info[1].Split(" ").Select(long.Parse).ToArray();
 
             if (IsValid2(numbers[0], 1, numbers, number))
+            {
                 total += number;
+                await SetIntermediateResult(total);
+            }
         }
 
         return total.ToString();

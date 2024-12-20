@@ -1,6 +1,6 @@
-internal class Day9 : IPuzzle
+internal class Day9 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var numbers = input.Trim().ToCharArray().Select(c => (int)c - 48).ToArray();
 
@@ -52,10 +52,10 @@ internal class Day9 : IPuzzle
             id++;
         }
 
-        return total.ToString();
+        return ToString(total);
     }
 
-    public string Part2(string input)
+    public override Task<string> Part2(string input)
     {
         var numbers = input.Trim().ToCharArray().Select(c => (int)c - 48).ToArray();
         var total = 0L;
@@ -108,6 +108,6 @@ internal class Day9 : IPuzzle
             id += available;
         }
 
-        return total.ToString();
+        return ToString(total);
     }
 }

@@ -1,6 +1,6 @@
-internal sealed class Day16 : IPuzzle
+internal sealed class Day16 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var (grid, startX, startY) = LoadGrid(input);
 
@@ -32,7 +32,10 @@ internal sealed class Day16 : IPuzzle
             if (grid[y][x] == 'E')
             {
                 if (score < bestScore)
+                {
                     bestScore = score;
+                    await SetIntermediateResult(bestScore);
+                }
                 continue;
             }
 
@@ -51,7 +54,7 @@ internal sealed class Day16 : IPuzzle
         return bestScore.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var (grid, startX, startY) = LoadGrid(input);
 
@@ -90,6 +93,7 @@ internal sealed class Day16 : IPuzzle
                 {
                     bestScore = score;
                     bestPositions = positions;
+                    await SetIntermediateResult(bestScore);
                 }
                 else if (score == bestScore)
                 {

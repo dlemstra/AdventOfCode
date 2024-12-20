@@ -1,16 +1,16 @@
-internal sealed class Day18 : IPuzzle
+internal sealed class Day18 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var fallingBytes = CreateFallingBytes(input);
         var steps = GetStepCount(fallingBytes, 1024);
         if (steps is null)
-            return "Not found";
+            return Task.FromResult("Not found");
 
-        return steps.Value.ToString();
+        return ToString(steps.Value);
     }
 
-    public string Part2(string input)
+    public override Task<string> Part2(string input)
     {
         var fallingBytes = CreateFallingBytes(input);
 
@@ -34,7 +34,7 @@ internal sealed class Day18 : IPuzzle
 
         var fallingByte = fallingBytes[lastSuccess];
 
-        return $"{fallingByte.Item1},{fallingByte.Item2}";
+        return Task.FromResult($"{fallingByte.Item1},{fallingByte.Item2}");
     }
 
     private static (int, int)[] CreateFallingBytes(string input)

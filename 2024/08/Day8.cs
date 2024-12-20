@@ -1,6 +1,6 @@
-internal class Day8 : IPuzzle
+internal class Day8 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var (antennaLists, x, y) = ReadInput(input);
 
@@ -28,12 +28,14 @@ internal class Day8 : IPuzzle
                         antinodes.Add((antiNodeX, antiNodeY));
                 }
             }
+
+            await SetIntermediateResult(antinodes.Count);
         }
 
         return antinodes.Count.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var (antennaLists, x, y) = ReadInput(input);
 
@@ -71,6 +73,8 @@ internal class Day8 : IPuzzle
                     }
                 }
             }
+
+            await SetIntermediateResult(antinodes.Count);
         }
 
         return antinodes.Count.ToString();

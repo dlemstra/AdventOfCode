@@ -1,12 +1,12 @@
-internal class Day11 : IPuzzle
+internal class Day11 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
         => StonesCount(input, 25);
 
-    public string Part2(string input)
+    public override Task<string> Part2(string input)
         => StonesCount(input, 75);
 
-    private string StonesCount(string input, int times)
+    private async Task<string> StonesCount(string input, int times)
     {
         var items = new LinkedList<long>(input.Trim().Split(' ').Select(long.Parse));
 
@@ -17,6 +17,8 @@ internal class Day11 : IPuzzle
         {
             var count = NumberCount(visited, item, times);
             total += count;
+
+            await SetIntermediateResult(total);
         }
 
         return total.ToString();

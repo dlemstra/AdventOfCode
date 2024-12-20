@@ -1,6 +1,6 @@
-internal class Day3 : IPuzzle
+internal class Day3 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var total = 0;
         var index = 0;
@@ -46,7 +46,10 @@ internal class Day3 : IPuzzle
                     else
                     {
                         if (right != -1 && input[index] == ')')
+                        {
                             total += left * right;
+                            await SetIntermediateResult(total);
+                        }
                         stage = Stage.Start;
                     }
                     index++;
@@ -57,7 +60,7 @@ internal class Day3 : IPuzzle
         return total.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var total = 0;
         var index = 0;
@@ -127,7 +130,10 @@ internal class Day3 : IPuzzle
                     else
                     {
                         if (right != -1 && input[index] == ')')
+                        {
                             total += left * right;
+                            await SetIntermediateResult(total);
+                        }
                         stage = Stage.Start;
                     }
                     index++;
@@ -137,13 +143,14 @@ internal class Day3 : IPuzzle
 
         return total.ToString();
     }
+
+    enum Stage
+    {
+        Start,
+        Left,
+        Right,
+        End,
+        Disabled,
+    }
 }
 
-enum Stage
-{
-    Start,
-    Left,
-    Right,
-    End,
-    Disabled,
-}

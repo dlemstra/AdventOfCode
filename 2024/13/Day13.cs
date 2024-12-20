@@ -1,20 +1,20 @@
-internal sealed class Day13 : IPuzzle
+internal sealed class Day13 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var lines = input.Split('\n');
 
         return CalculateTokens(lines, 0, 100);
     }
 
-    public string Part2(string input)
+    public override Task<string> Part2(string input)
     {
         var lines = input.Split('\n');
 
         return CalculateTokens(lines, 10000000000000, long.MaxValue);
     }
 
-    private string CalculateTokens(string[] lines, long addition, long maxTimes)
+    private async Task<string> CalculateTokens(string[] lines, long addition, long maxTimes)
     {
         var total = 0L;
         for (var i = 0; i < lines.Length; i++)
@@ -40,7 +40,10 @@ internal sealed class Day13 : IPuzzle
                 continue;
 
             if ((countA * aX + countB * bX == prizeX) && (countA * aY + countB * bY == prizeY))
+            {
                 total += (countA * 3) + countB;
+                await SetIntermediateResult(total);
+            }
         }
 
         return total.ToString();

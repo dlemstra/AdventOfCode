@@ -1,6 +1,6 @@
-internal class Day1 : IPuzzle
+internal class Day1 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var (listA, listB) = ReadInput(input);
 
@@ -10,10 +10,10 @@ internal class Day1 : IPuzzle
             total += Math.Abs(listA[i] - listB[i]);
         }
 
-        return total.ToString();
+        return ToString(total);
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var (listA, listB) = ReadInput(input);
 
@@ -39,6 +39,8 @@ internal class Day1 : IPuzzle
                     break;
                 }
             }
+
+            await SetIntermediateResult(total);
         }
 
         return total.ToString();

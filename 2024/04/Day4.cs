@@ -1,6 +1,6 @@
-internal class Day4 : IPuzzle
+internal class Day4 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var grid = LoadGrid(input);
 
@@ -23,12 +23,14 @@ internal class Day4 : IPuzzle
                     total += matchCount(ref grid, x, y, -1, 0, remaining);
                 }
             }
+
+            await SetIntermediateResult(total);
         }
 
         return total.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var grid = LoadGrid(input);
 
@@ -45,9 +47,11 @@ internal class Day4 : IPuzzle
                      (matchCount(ref grid, x, y, 1, -1, "S") == 1 && matchCount(ref grid, x, y, -1, 1, "M") == 1)))
                         total++;
             }
+
+            await SetIntermediateResult(total);
         }
 
-        return total.ToString();
+        return await ToString(total);
     }
 
     private char[][] LoadGrid(string input)

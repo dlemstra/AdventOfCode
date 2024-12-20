@@ -19,6 +19,10 @@ function setResult(result) {
     adventOfCode.button.disabled = false;
 }
 
+async function setIntermediateResult(result) {
+    adventOfCode.result.innerText = result;
+};
+
 (async () => {
     const { dotnet } = await import('./_framework/dotnet.js');
     const { getAssemblyExports, getConfig } = await dotnet.create();
@@ -42,6 +46,7 @@ function setResult(result) {
 async function getPuzzleInput(day) {
     var input = await adventOfCode.GetInput(day);
     adventOfCode.input.value = input;
+    adventOfCode.result.innerText = '';
 }
 
 function getPuzzleResult() {

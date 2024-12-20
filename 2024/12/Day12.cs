@@ -1,18 +1,21 @@
-internal sealed class Day12 : IPuzzle
+internal sealed class Day12 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var grid = LoadGrid(input);
 
         var total = 0;
 
         foreach (var (area, fences) in CalculateAreaAndFences(grid))
+        {
             total += area * fences.Count;
+            await SetIntermediateResult(total);
+        }
 
         return total.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var grid = LoadGrid(input);
 
@@ -59,6 +62,8 @@ internal sealed class Day12 : IPuzzle
             }
 
             total += area * longFences;
+
+            await SetIntermediateResult(total);
         }
 
         return total.ToString();

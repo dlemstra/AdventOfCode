@@ -1,6 +1,6 @@
-internal class Day6 : IPuzzle
+internal class Day6 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var (map, startX, startY) = LoadMap(input);
         var direction = Direction.North;
@@ -29,6 +29,7 @@ internal class Day6 : IPuzzle
             }
 
             visited.Add($"{startX},{startY}");
+            await SetIntermediateResult(visited.Count);
 
             switch (direction)
             {
@@ -50,7 +51,7 @@ internal class Day6 : IPuzzle
         return visited.Count.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var (map, startX, startY) = LoadMap(input);
 
@@ -70,7 +71,10 @@ internal class Day6 : IPuzzle
             var (x, y) = position;
             visited = GetVisitedPositions(ref map, startX, startY, x, y);
             if (visited == null)
+            {
                 total++;
+                await SetIntermediateResult(total);
+            }
         }
 
         return total.ToString();

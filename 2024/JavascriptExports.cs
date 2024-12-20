@@ -31,7 +31,7 @@ public partial class JavascriptExports
         if (day < 1 || day > _puzzles.Count)
             return $"Invalid day: {day}";
 
-        return await Task.Run(() => ExecutePuzzle(_puzzles[day - 1], part, input));
+        return await ExecutePuzzle(_puzzles[day - 1], part, input);
     }
 
     [JSExport]
@@ -47,11 +47,11 @@ public partial class JavascriptExports
         return input.TrimEnd();
     }
 
-    private static string ExecutePuzzle(IPuzzle puzzle, int part, string input)
+    private static async Task<string> ExecutePuzzle(IPuzzle puzzle, int part, string input)
         => part switch
         {
-            1 => puzzle.Part1(input),
-            2 => puzzle.Part2(input),
+            1 => await puzzle.Part1(input),
+            2 => await puzzle.Part2(input),
             _ => $"Invalid part: {part}",
         };
 }

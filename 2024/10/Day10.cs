@@ -1,20 +1,20 @@
-internal class Day10 : IPuzzle
+internal class Day10 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var grid = LoadGrid(input);
 
         return GetScoreSum(grid, trackVisited: true);
     }
 
-    public string Part2(string input)
+    public override Task<string> Part2(string input)
     {
         var grid = LoadGrid(input);
 
         return GetScoreSum(grid, trackVisited: false);
     }
 
-    private string GetScoreSum(int[][] grid, bool trackVisited)
+    private async Task<string> GetScoreSum(int[][] grid, bool trackVisited)
     {
         var total = 0;
         foreach (var (startX, startY) in GetStartingPositions(grid))
@@ -53,6 +53,8 @@ internal class Day10 : IPuzzle
             }
 
             total += found;
+
+            await SetIntermediateResult(total);
         }
 
         return total.ToString();

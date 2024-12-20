@@ -1,6 +1,6 @@
-internal class Day5 : IPuzzle
+internal class Day5 : Puzzle
 {
-    public string Part1(string input)
+    public override async Task<string> Part1(string input)
     {
         var updateInfo = new UpdateInfo(input);
 
@@ -28,13 +28,16 @@ internal class Day5 : IPuzzle
             }
 
             if (isValid)
+            {
                 total += numbers[numbers.Length / 2];
+                await SetIntermediateResult(total);
+            }
         }
 
         return total.ToString();
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var updateInfo = new UpdateInfo(input);
 
@@ -79,7 +82,10 @@ internal class Day5 : IPuzzle
             }
 
             if (tries > 1)
+            {
                 total += numbers[numbers.Length / 2];
+                await SetIntermediateResult(total);
+            }
         }
 
         return total.ToString();

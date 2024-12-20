@@ -1,13 +1,13 @@
-internal sealed class Day17 : IPuzzle
+internal sealed class Day17 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var (a, b, c, instructions) = LoadInstructions(input);
 
-        return string.Join(",", GetOutput(a, b, c, instructions));
+        return Task.FromResult(string.Join(",", GetOutput(a, b, c, instructions)));
     }
 
-    public string Part2(string input)
+    public override Task<string> Part2(string input)
     {
         var (a, b, c, instructions) = LoadInstructions(input);
 
@@ -27,13 +27,13 @@ internal sealed class Day17 : IPuzzle
                     continue;
 
                 if (index == 0)
-                    return newA.ToString();
+                    return ToString(newA);
 
                 options.AddLast((newA * 8, index - 1));
             }
         }
 
-        return "Not found";
+        return Task.FromResult("Not found");
     }
 
     private static (long, long, long, long[]) LoadInstructions(string input)

@@ -1,6 +1,6 @@
-internal class Day2 : IPuzzle
+internal class Day2 : Puzzle
 {
-    public string Part1(string input)
+    public override Task<string> Part1(string input)
     {
         var safe = 0;
         foreach (var line in input.Split('\n'))
@@ -10,29 +10,30 @@ internal class Day2 : IPuzzle
                 safe++;
         }
 
-        return safe.ToString();
+        return ToString(safe);
     }
 
-    public string Part2(string input)
+    public override async Task<string> Part2(string input)
     {
         var safe = 0;
         foreach (var line in input.Split('\n'))
         {
+            await SetIntermediateResult(safe);
+
             var data = line.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
             if (isSafeRow(data))
             {
                 safe++;
+                continue;
             }
-            else
+
+            var old = safe;
+            for (var skip = 0; skip < data.Length; skip++)
             {
-                var old = safe;
-                for (var skip = 0; skip < data.Length; skip++)
+                if (isSafeRow(data, skip))
                 {
-                    if (isSafeRow(data, skip))
-                    {
-                        safe++;
-                        break;
-                    }
+                    safe++;
+                    break;
                 }
             }
         }
