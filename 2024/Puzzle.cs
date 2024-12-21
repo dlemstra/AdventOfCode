@@ -1,18 +1,14 @@
 internal abstract class Puzzle : IPuzzle
 {
-    private long _previousIntermediateResult = 0;
-    private long _delta = 0;
+    private DateTime _lastUppate = DateTime.MinValue;
 
     protected async Task SetIntermediateResult(long value)
     {
-        var delta = Math.Abs(value - _previousIntermediateResult);
+        if (DateTime.Now - _lastUppate < TimeSpan.FromMilliseconds(200))
+            return;
 
-        if (delta >= _delta)
-        {
-            await JavascriptImports.SetIntermediateResult(value.ToString());
-            _delta = delta;
-            _previousIntermediateResult = value;
-        }
+        _lastUppate = DateTime.Now;
+        await JavascriptImports.SetIntermediateResult(value.ToString());
     }
 
     protected static Task<string> ToString(long value)
