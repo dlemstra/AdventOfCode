@@ -2,7 +2,13 @@ using System.Text;
 
 internal sealed class Day21 : Puzzle
 {
-    public override async Task<string> Part1(string input)
+    public override Task<string> Part1(string input)
+        => GetKeyPresses(input, 2);
+
+    public override Task<string> Part2(string input)
+        => GetKeyPresses(input, 25);
+
+    private async Task<string> GetKeyPresses(string input, int maxDepth)
     {
         var robotA = new char[][]
         {
@@ -12,7 +18,7 @@ internal sealed class Day21 : Puzzle
             [' ', '0', 'A'],
         };
 
-        var pathsRobotA = FindPaths(robotA, 3);
+        var pathsRobotA = FindPaths(robotA);
 
         var robotB = new char[][]
         {
@@ -20,54 +26,84 @@ internal sealed class Day21 : Puzzle
             ['<', 'v', '>'],
         };
 
-        var pathsRobotB = FindPaths(robotB, 0);
+        var pathsRobotB = FindPaths(robotB);
 
-        var total = 0;
+        var calculated = new Dictionary<(string, int), long>();
+
+        var total = 0L;
         foreach (var line in input.Split('\n'))
         {
             var code = line.Trim();
-            //var code = "379A";
-            var position = 'A';
 
-            var pathA = GetPath(pathsRobotA, code);
-            var pathB = GetPath(pathsRobotB, pathA);
-            var pathC = GetPath(pathsRobotB, pathB);
-            total += pathC.Length * int.Parse(code.Replace("A", ""));
+            var length = 0L;
+            var positionA = 'A';
+            foreach (var number in code)
+            {
+                var paths = pathsRobotA[$"{positionA}{number}"];
 
+                var best = long.MaxValue;
+                foreach (var path in paths)
+                {
+                    var keyPresses = GetKeyPresses(robotB, path + "A", pathsRobotB, calculated, maxDepth);
+                    if (keyPresses < best)
+                        best = keyPresses;
+                }
+
+                length += best;
+
+                positionA = number;
+            }
+
+            total += length * int.Parse(code.Replace("A", string.Empty));
             await SetIntermediateResult(total);
         }
 
         return total.ToString();
     }
 
-    public override Task<string> Part2(string input)
+    private static long GetKeyPresses(char[][] grid, string keys, IReadOnlyDictionary<string, string[]> paths, Dictionary<(string, int), long> calculated, int maxDepth, int depth = 0)
     {
-        return Task.FromResult("Not implemented");
-    }
+        if (depth == maxDepth)
+            return keys.Length;
 
-    private static string GetPath(IReadOnlyDictionary<string, string> paths, string code)
-    {
-        var path = new StringBuilder();
+        if (calculated.TryGetValue((keys, depth), out var total))
+            return total;
 
         var position = 'A';
-        foreach (var number in code)
+        foreach (var key in keys)
         {
-            if (paths.TryGetValue($"{position}{number}", out var value))
-                path.Append(value);
+            if (position == key)
+            {
+                total += GetKeyPresses(grid, "A", paths, calculated, maxDepth, depth + 1);
+            }
+            else
+            {
+                var best = long.MaxValue;
+                foreach (var path in paths[$"{position}{key}"])
+                {
+                    var keyPresses = GetKeyPresses(grid, path + "A", paths, calculated, maxDepth, depth + 1);
+                    if (keyPresses < best)
+                        best = keyPresses;
+                }
 
-            path.Append("A");
-            position = number;
+                total += best;
+            }
+
+            position = key;
         }
 
-        return path.ToString();
+        calculated[(keys, depth)] = total;
+
+        return total;
     }
 
-    private static IReadOnlyDictionary<string, string> FindPaths(char[][] grid, int spaceRow)
+    private static IReadOnlyDictionary<string, string[]> FindPaths(char[][] grid)
     {
         var values = grid.SelectMany(innerArray => innerArray).Where(c => c != ' ').ToArray();
         var positions = GetPositions(grid, values);
+        var (spaceX, spaceY) = GetPositions(grid, [' '])[' '];
 
-        var paths = new Dictionary<string, string>();
+        var paths = new Dictionary<string, string[]>();
         for (var i = 0; i < values.Length; i++)
         {
             for (var j = 0; j < values.Length; j++)
@@ -77,93 +113,41 @@ internal sealed class Day21 : Puzzle
                     continue;
                 }
 
-                var start = values[i];
-                var end = values[j];
-                var path = FindPath(grid, positions, start, end, spaceRow);
-                paths.Add($"{start}{end}", path);
+                var (startX, startY) = positions[values[i]];
+                var (endX, endY) = positions[values[j]];
+                var key = $"{values[i]}{values[j]}";
+
+                var path = new string(Enumerable.Repeat(startX < endX ? '>' : '<', Math.Abs(startX - endX)).ToArray());
+                if (startY == endY)
+                {
+                    paths.Add(key, [path]);
+                }
+                else
+                {
+                    var move = new string(Enumerable.Repeat(startY < endY ? 'v' : '^', Math.Abs(startY - endY)).ToArray());
+                    if (startX == endX)
+                    {
+                        paths.Add(key, [move]);
+                    }
+                    else if (startX < endX)
+                    {
+                        if (startX == spaceX && endY == spaceY)
+                            paths.Add(key, [path + move]);
+                        else
+                            paths.Add(key, [path + move, move + path]);
+                    }
+                    else
+                    {
+                        if (startY == spaceY && endX == spaceX)
+                            paths.Add(key, [move + path]);
+                        else
+                            paths.Add(key, [move + path, path + move]);
+                    }
+                }
             }
         }
 
         return paths;
-    }
-
-    private static string FindPath(char[][] grid, IReadOnlyDictionary<char, (int, int)> positions, char start, char end, int spaceRow)
-    {
-        var (startX, startY) = positions[start];
-        var (endX, endY) = positions[end];
-
-        var values = new List<char>();
-
-        var x = startX;
-        var y = startY;
-
-        if (endX == 0 && y != spaceRow)
-        {
-            while (y != endY)
-            {
-                if (y < endY)
-                {
-                    y++;
-                    values.Add('v');
-                }
-                else
-                {
-                    y--;
-                    values.Add('^');
-                }
-            }
-        }
-
-        if (x > endX)
-        {
-            while (x != endX)
-            {
-                if (x < endX)
-                {
-                    x++;
-                    values.Add('>');
-                }
-                else
-                {
-                    x--;
-                    values.Add('<');
-                }
-            }
-        }
-
-
-        while (x != endX || y != endY)
-        {
-            while (y != endY)
-            {
-                if (y < endY)
-                {
-                    y++;
-                    values.Add('v');
-                }
-                else
-                {
-                    y--;
-                    values.Add('^');
-                }
-            }
-
-            while (x != endX)
-            {
-                if (x < endX)
-                {
-                    x++;
-                    values.Add('>');
-                }
-                else
-                {
-                    x--;
-                    values.Add('<');
-                }
-            }
-        }
-
-        return new string(values.ToArray());
     }
 
     private static IReadOnlyDictionary<char, (int, int)> GetPositions(char[][] grid, char[] values)
