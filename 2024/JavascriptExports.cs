@@ -27,6 +27,7 @@ public partial class JavascriptExports
         new Day21(),
         new Day22(),
         new Day23(),
+        new Day24(),
     ];
 
     [JSExport]
