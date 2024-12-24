@@ -1,8 +1,51 @@
-using System.Text;
-
 internal sealed class Day24 : Puzzle
 {
     public override Task<string> Part1(string input)
+    {
+        var gates = LoadGates(input);
+
+        var result = 0L;
+        var bitPosition = 0;
+        foreach (var gate in gates.Where(kv => kv.Key.StartsWith('z')).OrderBy(kv => kv.Key).Select(kv => kv.Value))
+        {
+            var value = gate.GetValue();
+            if (value == 1)
+                result |= (1L << bitPosition);
+
+            bitPosition++;
+        }
+
+        return ToString(result);
+    }
+
+    public override Task<string> Part2(string input)
+    {
+        var gates = LoadGates(input);
+
+        var lastOutputBit = gates.Values
+            .Where(gate => gate.IsEnd)
+            .OrderBy(gate => gate.Name)
+            .Last().Name;
+
+        var incorrect = gates.Values
+            .Where(gate => !gate.IsXOR && gate.IsEnd && gate.Name != lastOutputBit)
+            .ToList();
+
+        incorrect.AddRange(gates.Values
+            .Where(gate => gate.IsXOR &&
+                ((!gate.IsEnd && !gate.IsStart && !gate.Left!.IsStart && !gate.Right!.IsStart) ||
+                  gates.Values.Any(other => other.IsOR && (other.Left == gate || other.Right == gate))))
+            );
+
+        incorrect.AddRange(gates.Values
+            .Where(gate => gate.IsAND && !gate.IsStartBit &&
+                   gates.Values.Any(other => !other.IsOR && (other.Left == gate || other.Right == gate)))
+            );
+
+        return Task.FromResult(string.Join(',', incorrect.OrderBy(gate => gate.Name).Select(gate => gate.Name)));
+    }
+
+    private static IReadOnlyDictionary<string, Gate> LoadGates(string input)
     {
         var lines = input.Split("\n").Select(l => l.Trim()).ToArray();
 
@@ -52,23 +95,7 @@ internal sealed class Day24 : Puzzle
             gates[kv.Key].SetValue(kv.Value);
         }
 
-        var result = 0L;
-        var bitPosition = 0;
-        foreach (var gate in gates.Where(kv => kv.Key.StartsWith('z')).OrderBy(kv => kv.Key).Select(kv => kv.Value))
-        {
-            var value = gate.GetValue();
-            if (value == 1)
-                result |= (1L << bitPosition);
-
-            bitPosition++;
-        }
-
-        return ToString(result);
-    }
-
-    public override Task<string> Part2(string input)
-    {
-        return Task.FromResult("Not implemented");
+        return gates;
     }
 
     private class Gate
@@ -82,9 +109,30 @@ internal sealed class Day24 : Puzzle
         }
 
         public string Name { get; }
+
         public Gate? Left { get; set; }
+
         public Gate? Right { get; set; }
+
         public string? Operation { get; set; }
+
+        public bool IsAND
+            => Operation == "AND";
+
+        public bool IsOR
+            => Operation == "OR";
+
+        public bool IsXOR
+            => Operation == "XOR";
+
+        public bool IsEnd
+            => Name[0] == 'z';
+
+        public bool IsStart
+            => Operation == null;
+
+        public bool IsStartBit
+            => Left?.Name == "x00" || Left?.Name == "y00" || Right?.Name == "x00" || Right?.Name == "y00";
 
         public int GetValue()
         {
