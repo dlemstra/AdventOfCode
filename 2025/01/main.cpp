@@ -1,26 +1,39 @@
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
 
 int main() {
     std::ifstream file("input");
     std::string line;
 
-    ssize_t value = 50;
-    size_t count = 0;
-    while (std::getline(file, line)) {
-        int num = std::stoi(line.substr(1));
+    int value = 50;
+    int part1 = 0;
+    int part2 = 0;
+    while (std::getline(file, line))
+    {
+        int rotations = std::stoi(line.substr(1));
+        while (rotations >= 100)
+        {
+            rotations -= 100;
+            part2++;
+        }
+
+        int oldValue = value;
         if (line[0] == 'L')
-            value -= num;
+            value -= rotations;
         else if (line[0] == 'R')
-            value += num;
+            value += rotations;
+
+        if ((oldValue != 0 && value <= 0) || value >= 100)
+            part2++;
 
         value = (value + 100) % 100;
+
         if (value == 0)
-            count++;
+            part1++;
     }
 
-    std::cout << count << std::endl;
+    std::cout << part1 << std::endl;
+    std::cout << part2 << std::endl;
 
     return 0;
 }
