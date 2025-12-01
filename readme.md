@@ -12,3 +12,4 @@ Solutions for Advent of Code (https://adventofcode.com)
 - [2022](../../tree/main/2022): [Dart](https://dart.dev/)
 - [2023](../../tree/main/2023): [PHP](https://php.net/)
 - [2024](../../tree/main/2024): [C# (WASM)](https://dot.net/)
+- [2025](../../tree/main/2024): C++
