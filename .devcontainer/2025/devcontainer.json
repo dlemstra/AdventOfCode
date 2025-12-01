@@ -1,0 +1,15 @@
+{
+    "name": "C++",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "postCreateCommand": "echo 'cd /workspaces/AdventOfCode/2025' >> /root/.bashrc",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "EditorConfig.EditorConfig"
+            ],
+            "recommendations": []
+        }
+    }
+}
