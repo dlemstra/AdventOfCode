@@ -35,6 +35,7 @@ int main() {
     std::string line;
 
     long part1 = 0;
+    long part2 = 0;
     std::vector<std::vector<char>> grid;
     while (std::getline(file, line))
     {
@@ -47,7 +48,29 @@ int main() {
             if (canBeAccessByForklift(grid, x, y))
                 part1++;
 
+    for (auto y = 0; y < grid.size(); y++)
+    {
+        int removed = 0;
+        for (auto x = 0; x < grid[y].size(); x++)
+        {
+            auto canBeRemoved = canBeAccessByForklift(grid, x, y);
+            if (!canBeRemoved)
+                continue;
+
+            grid[y][x] = '.';
+            removed++;
+            part2++;
+        }
+
+        if (removed != 0)
+        {
+            y = std::max(0, y - 2);
+            removed = 0;
+        }
+    }
+
     std::cout << part1 << std::endl;
+    std::cout << part2 << std::endl;
 
     return 0;
 }
