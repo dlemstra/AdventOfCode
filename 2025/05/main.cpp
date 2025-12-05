@@ -3,18 +3,50 @@
 
 #include <vector>
 #include <sstream>
+#include <unordered_set>
 
 class Range {
 public:
     Range(long start, long end) : start(start), end(end) {}
 
-    bool intersects(long value) const {
+    bool intersects(long value) const
+    {
         return value >= start && value <= end;
     }
 
+    long length() const
+    {
+        return end - start + 1;
+    }
+
+    void removeOverlap(Range& other)
+    {
+        if (other.length() == 0)
+            return;
+
+        if (start >= other.start && end <= other.end)
+        {
+            start = 0;
+            end = -1;
+        }
+        else if (other.start >= start && other.end <= end)
+        {
+            other.start = 0;
+            other.end = -1;
+        }
+        else if (end >= other.start && end <= other.end)
+        {
+            end = other.start - 1;
+        }
+        else if (start <= other.end && start >= other.start)
+        {
+            start = other.end + 1;
+        }
+    }
+
 private:
-    const long start;
-    const long end;
+    long start;
+    long end;
 };
 
 static std::vector<std::string> split(const std::string& s, char delimiter = '-')
@@ -32,6 +64,7 @@ int main() {
     std::string line;
 
     long part1 = 0;
+    long part2 = 0;
     std::vector<Range> ranges;
     while (std::getline(file, line))
     {
@@ -57,7 +90,20 @@ int main() {
         }
     }
 
+    for (auto i = 0; i < ranges.size() - 1; i++)
+    {
+        if (ranges[i].length() == 0)
+            continue;
+
+        for (auto j = i + 1; j < ranges.size(); j++)
+            ranges[i].removeOverlap(ranges[j]);
+    }
+
+    for (const auto& range : ranges)
+        part2 += range.length();
+
     std::cout << part1 << std::endl;
+    std::cout << part2 << std::endl;
 
     return 0;
 }
