@@ -69,8 +69,44 @@ int main()
     }
 
     auto part1 = std::accumulate(totals.begin(), totals.end(), 0L);
+    auto part2 = 0L;
+
+    auto operatorIndex = 0;
+    auto total = 0L;
+    for (auto x = 0; x < lines[0].size(); x++)
+    {
+        auto number = 0;
+        for (auto y = 0; y < lines.size(); y++)
+        {
+            if (lines[y][x] == ' ')
+                continue;
+
+            number = number * 10 + (lines[y][x] - '0');
+        }
+
+        if (number == 0)
+        {
+            part2 += total;
+            total = 0;
+            operatorIndex++;
+            continue;
+        }
+
+        if (total == 0)
+        {
+            total = number;
+            continue;
+        }
+
+        if (operations[operatorIndex] == Operation::Add)
+            total += number;
+        else if (operations[operatorIndex] == Operation::Multiply)
+            total *= number;
+    }
+    part2 += total;
 
     std::cout << part1 << std::endl;
+    std::cout << part2 << std::endl;
 
     return 0;
 }
