@@ -10,6 +10,8 @@ tab_width = 4
 
 [input]
 insert_final_newline = false
+trim_trailing_whitespace = false
 
 [testinput]
 insert_final_newline = false
+trim_trailing_whitespace = false
