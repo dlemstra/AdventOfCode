@@ -11,24 +11,22 @@ class Box
 {
 public:
     Box(int id, int x, int y, int z)
-        : id(id), _x(x), _y(y), _z(z)
+        : id(id), x(x), y(y), z(z)
     {
     }
 
     const int id;
+    const long x;
+    const long y;
+    const long z;
 
     double distanceTo(const Box& other) const
     {
-        long dx = _x - other._x;
-        long dy = _y - other._y;
-        long dz = _z - other._z;
+        auto dx = x - other.x;
+        auto dy = y - other.y;
+        auto dz = z - other.z;
         return std::sqrt(dx * dx + dy * dy + dz * dz);
     }
-
-private:
-    int _x;
-    int _y;
-    int _z;
 };
 
 class Circuit
@@ -59,7 +57,7 @@ public:
         return true;
     }
 
-    void merge(Circuit& other)
+    bool merge(Circuit& other)
     {
         for (const auto& boxId : _connectedBoxes)
         {
@@ -70,9 +68,11 @@ public:
                     other._connectedBoxes.insert(otherBoxId);
                 }
                 _connectedBoxes.clear();
-                break;
+                return true;
             }
         }
+
+        return false;
     }
 
     int size() const
@@ -83,6 +83,22 @@ public:
 private:
     std::unordered_set<int> _connectedBoxes;
 };
+
+static void mergeCircuits(std::vector<Circuit>& circuits)
+{
+    for (auto i = 0; i < circuits.size(); i++)
+    {
+        for (auto j = i + 1; j < circuits.size(); j++)
+        {
+            if (circuits[i].merge(circuits[j]))
+            {
+                circuits.erase(circuits.begin() + i);
+                i--;
+                break;
+            }
+        }
+    }
+}
 
 int main() {
     std::ifstream file("input");
@@ -137,9 +153,7 @@ int main() {
             circuits.emplace_back(left, right);
     }
 
-    for (auto i = 0; i < circuits.size(); i++)
-        for (auto j = i + 1; j < circuits.size(); j++)
-            circuits[i].merge(circuits[j]);
+    mergeCircuits(circuits);
 
     std::vector<int> sizes;
     for (auto i = 0; i < circuits.size(); i++)
@@ -151,7 +165,37 @@ int main() {
     for (auto i = 0; i < 3; i++)
         part1 *= sizes[i];
 
+    long part2 = 0;
+    for (auto k = 1000; k < distanceConnections.size(); k++)
+    {
+        auto conn = distanceConnections[k];
+        auto left = boxes[std::get<1>(conn)];
+        auto right = boxes[std::get<2>(conn)];
+
+        auto connected = false;
+        for (auto& circuit : circuits)
+        {
+            if (circuit.connect(left, right))
+            {
+                connected = true;
+                break;
+            }
+        }
+
+        if (!connected)
+            circuits.emplace_back(left, right);
+
+        mergeCircuits(circuits);
+
+        if (circuits.size() == 1 && circuits[0].size() == boxes.size())
+        {
+            part2 = left.x * right.x;
+            break;
+        }
+    }
+
     std::cout << "Part 1: " << part1 << std::endl;
+    std::cout << "Part 2: " << part2 << std::endl;
 
     return 0;
 }
